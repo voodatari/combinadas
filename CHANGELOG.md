@@ -2,6 +2,15 @@
 
 Formato de versión: `X.Y.Z`, igual que el número que llevan los archivos en `index.html` (`?v=…`) y la cinta del menú principal.
 
+## [1.2.12] - 2026-10-28
+- **Carteles de «¡Velocidad luz!» y «¡Qué rápido!» en «Paso a paso»**: ya no suben flotando por encima de las operaciones que se reducen y suben. Ahora se quedan quietos justo encima del historial (en el hueco entre la pregunta y las operaciones), con un pequeño rebote al aparecer y un desvanecimiento al irse; si el hueco es pequeño (móvil) el cartel se reduce hasta caber. En las demás actividades siguen como antes.
+
+## [1.2.11] - 2026-10-28
+- **«Paso a paso»: la animación empieza en el momento de acertar.** Antes había una pausa de 0,64 s con la respuesta en verde y solo después subía la operación; ahora la operación empieza a subir y reducirse en cuanto se pulsa la opción correcta (los botones viejos, en verde, se quedan hasta que se voltean). En estos pasos intermedios no se escribe la nota de la solución, que se borraría al instante; al acertar el último paso (cuando viene una operación nueva) se mantiene la pausa y la nota.
+
+## [1.2.10] - 2026-10-28
+- **«Paso a paso»: toda la animación un 20 % más rápida**: la pausa tras acertar (0,8 → 0,64 s), la subida y reducción de la operación (0,8 → 0,64 s), el desvanecimiento del «= ?» (0,16 → 0,13 s) y el volteo de las tarjetas (cada vuelta entera 0,29 → 0,23 s, con la misma cascada: cada una empieza cuando la anterior va por la mitad). De acertar a poder contestar la siguiente pasa de unos 2,2 s a 1,8 s.
+
 ## [1.2.9] - 2026-10-28
 - **Volteo de los botones en cascada de verdad, y un 20 % más rápido.** Cada tarjeta tarda ahora 0,29 s en dar su vuelta entera (media vuelta para irse y media para que salga la nueva; antes 0,36 s). La del centro empieza cuando la de la izquierda va por la mitad de su vuelta, y la de la derecha cuando la del centro va por la mitad. Todo el volteo dura unos 0,6 s.
 

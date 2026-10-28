@@ -430,7 +430,7 @@ const app = {
                    nueva también se voltea. Empieza cuando la anterior ha terminado de subir. */
                 // Botones: cada tarjeta gira sobre el eje vertical (media vuelta para irse, media para que salga la nueva) y van una detrás de otra, de izquierda
                 // a derecha: la siguiente empieza cuando la anterior va por la mitad de su vuelta. La operación se voltea sobre el eje horizontal.
-                const MEDIO = 144, ESCALON = MEDIO;      // media vuelta = 144 ms (la vuelta entera de una tarjeta, 288); la siguiente empieza cuando la anterior va por la mitad
+                const MEDIO = 115, ESCALON = MEDIO;      // media vuelta = 115 ms (la vuelta entera de una tarjeta, 230); la siguiente empieza cuando la anterior va por la mitad
                 const voltear = (el, eje, desde, hasta, retardo) => el.animate(
                     [{ transform: 'perspective(700px) rotate' + eje + '(' + desde + 'deg)' }, { transform: 'perspective(700px) rotate' + eje + '(' + hasta + 'deg)' }],
                     { duration: MEDIO, delay: retardo, easing: desde ? 'ease-out' : 'ease-in', fill: desde ? 'backwards' : 'both' });    // los nuevos acaban sin transform (el hover sigue funcionando)
@@ -490,11 +490,11 @@ const app = {
             animaciones.push(el.animate([
                 { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + esc + ')', color: desdeGrande ? '#ffffff' : getComputedStyle(el).color, opacity: desdeGrande ? 1 : 0.8 },
                 { transform: 'none', color: getComputedStyle(el).color, opacity: 0.8 }
-            ], { duration: 800, easing: 'cubic-bezier(0.3, 0.1, 0.2, 1)' }));
+            ], { duration: 640, easing: 'cubic-bezier(0.3, 0.1, 0.2, 1)' }));
         });
         const fin = animaciones.length ? Promise.all(animaciones.map(a => a.finished)) : null;
         if (fin) fin.then(() => area.querySelectorAll('.hist-linea .resto').forEach(r => {
-            const a = r.animate && r.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: 'ease-out', fill: 'forwards' });
+            const a = r.animate && r.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 128, easing: 'ease-out', fill: 'forwards' });
             if (a) a.onfinish = () => r.remove(); else r.remove();
         }), () => {});
         return fin;
@@ -580,7 +580,8 @@ const app = {
         const dt = Date.now() - q.inicio;
         s.total++;
         if (ok && q.tipo === 'pasos') this.avanzarPasos(q);       // resuelto un paso: el siguiente pregunta sigue con la misma operación
-        this.$('answer-note').innerHTML = this.notaRespuesta(q, ok);
+        const sigueOperacion = ok && q.tipo === 'pasos' && !s.pasos.fin;       // acierta un paso y la misma operación continúa: la animación empieza ya
+        this.$('answer-note').innerHTML = sigueOperacion ? '' : this.notaRespuesta(q, ok);
 
         if (ok) {
             s.aciertos++;
@@ -598,7 +599,7 @@ const app = {
             this.$('hud-score').textContent = s.score;
             floatText('+' + puntos, this.$('hud-score'), 'float-good');
             updateStreak(s.streak);
-            this.later(() => this.siguientePregunta(), 800);
+            this.later(() => this.siguientePregunta(), sigueOperacion ? 0 : q.tipo === 'pasos' ? 640 : 800);      // «Paso a paso»: al acertar un paso empieza la animación en el acto
             return;
         }
 
@@ -723,6 +724,17 @@ const app = {
         pop.className = 'speed-popup speed-text-' + clase;
         pop.textContent = texto;
         board.appendChild(pop);
+        // «Paso a paso»: el cartel no flota por encima de las operaciones que suben y se reducen; se queda quieto justo encima del historial
+        // (en el hueco que hay entre la pregunta y las operaciones), más pequeño si no cabe
+        const area = this.$('question-area'), hist = this.state.q && this.state.q.tipo === 'pasos' && area.querySelector('.historial');
+        if (hist) {
+            pop.classList.add('fija');
+            const tabla = board.getBoundingClientRect(), tope = this.$('question-text').getBoundingClientRect().bottom - tabla.top;
+            let tam = parseFloat(getComputedStyle(pop).fontSize);
+            const colocar = () => { pop.style.top = (hist.getBoundingClientRect().top - tabla.top - pop.offsetHeight - 2) + 'px'; };
+            colocar();
+            while (parseFloat(pop.style.top) < tope && tam > 12) { tam -= 1; pop.style.fontSize = tam + 'px'; colocar(); }
+        }
         setTimeout(() => pop.remove(), 1200);
     },
 

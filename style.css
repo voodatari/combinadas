@@ -335,6 +335,9 @@ html.estrecho .hist-linea { font-size: 1.25em; }
     position: absolute; font-family: var(--font-display); font-size: 1.8rem; pointer-events: none; z-index: 50;
     text-align: center; width: 100%; top: 40%; left: 0; animation: speedPop 1.2s ease-out forwards;
 }
+/* en «Paso a paso»: quieto sobre el historial (app.js lo coloca), sin subir flotando por encima de las operaciones */
+.speed-popup.fija { animation: speedPopFija 1.1s ease-out forwards; line-height: 1.1; white-space: nowrap; }
+@keyframes speedPopFija { 0% { opacity: 0; transform: scale(0.6); } 15% { opacity: 1; transform: scale(1.12); } 25% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-0.3rem); } }
 .speed-text-super { color: var(--danger); text-shadow: 0 0 1.8rem var(--danger); }
 .speed-text-high { color: var(--secondary); text-shadow: 0 0 1.8rem var(--secondary); }
 @keyframes speedPop {
