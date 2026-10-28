@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Combinadas - Las operaciones combinadas</title>
+    <meta name="description" content="Operaciones combinadas: primero el paréntesis, luego × y ÷, después + y −. ¿Cuál va primero? ¿Cuánto vale?">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Lilita+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=1.1.0">
+    <link rel="stylesheet" href="explicacion.css?v=1.1.0">
+    <script src="rendimiento.js?v=1.1.0"></script>
+    <script src="escala.js?v=1.1.0"></script>
+</head>
+
+<body>
+    <!-- Fondo animado -->
+    <canvas id="bg-canvas"></canvas>
+    <div id="overlay"></div>
+
+    <div id="voz-carga" class="voz-carga hidden" role="status"><span id="voz-carga-texto">🗣️ Cargando la voz…</span><div class="barra"><i id="voz-carga-barra"></i></div></div>
+
+    <!-- Opciones: disponible en todos los menús (se oculta durante la partida) -->
+    <button id="settings-button" class="gear-btn" type="button" title="Opciones" aria-label="Opciones"><svg class="gear-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg></button>
+
+    <main id="app-container">
+
+        <!-- PANTALLA 1: INICIO -->
+        <section id="screen-home" class="screen active">
+            <div class="glass-panel text-center">
+                <div class="logo-expr" aria-hidden="true">
+                    <span class="le le-1"><b class="rol-a">4</b> + <b class="rol-b">3</b> × <b class="rol-c">5</b></span>
+                    <span class="le le-2"><b class="rol-a">4</b> + <b class="rol-d">15</b> = <b class="rol-d">19</b></span>
+                </div>
+                <h1 class="logo-title" aria-label="Combinadas">Combinadas</h1>
+                <p class="by-line">by profe Dani</p>
+                <p class="subtitle">Las operaciones combinadas: ¡primero el paréntesis y × ÷… y luego + −!</p>
+                <div class="player-input-container">
+                    <label for="player-name">Identifícate, jugador:</label>
+                    <input type="text" id="player-name" placeholder="Tu nombre (opcional)" autocomplete="off" maxlength="15">
+                </div>
+                <div class="stack">
+                    <button id="btn-start" class="btn-primary">▶️ Iniciar</button>
+                    <button id="btn-show-ranking" class="btn-secondary" data-go="screen-ranking">🏆 Rankings</button>
+                </div>
+            </div>
+            <div class="cinta-version" aria-hidden="true"><span id="version-cinta">v1.1.0</span></div>
+        </section>
+
+        <!-- PANTALLA 2: SELECCIÓN DE MODO -->
+        <section id="screen-modes" class="screen hidden">
+            <div class="glass-panel">
+                <button class="btn-icon back-btn" data-go="screen-home">← Volver</button>
+                <h2 class="section-title">Elige el modo de juego</h2>
+
+                <div class="modes-grid">
+                    <button class="mode-card" data-mode="timeattack">
+                        <div class="icon">⏱️</div>
+                        <h3>Contrarreloj</h3>
+                        <p>Todos los aciertos que puedas en el tiempo elegido.</p>
+                    </button>
+                    <button class="mode-card" data-mode="sudden_death">
+                        <div class="icon">💀</div>
+                        <h3>Muerte Súbita</h3>
+                        <p>Sin tiempo. Un error y se acaba.</p>
+                    </button>
+                    <button class="mode-card" data-mode="survival">
+                        <div class="icon">❤️</div>
+                        <h3>Supervivencia</h3>
+                        <p>3 vidas y un reloj que se acelera.</p>
+                    </button>
+                    <button class="mode-card" data-mode="practice">
+                        <div class="icon">🎓</div>
+                        <h3>Práctica</h3>
+                        <p>Sin presión. Cuando fallas, te explicamos por qué y cómo se hace.</p>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PANTALLA 3: QUÉ PRACTICAR -->
+        <section id="screen-config" class="screen hidden">
+            <div class="glass-panel">
+                <div class="panel-contenido">
+                <button class="btn-icon back-btn" data-go="screen-modes">← Volver</button>
+                <h2 class="section-title" id="config-title">¿Qué quieres practicar?</h2>
+
+                <div class="activity-grid" id="activity-grid">
+                    <button class="activity-card" data-actividad="reconocer">
+                        <span class="icon">🔎</span>
+                        <strong>¿Cuál va primero?</strong>
+                        <small>¿Qué operación hay que resolver antes?</small>
+                    </button>
+                    <button class="activity-card" data-actividad="igualdad">
+                        <span class="icon">⚖️</span>
+                        <strong>Elige la igualdad</strong>
+                        <small>¿Qué operación vale lo mismo?</small>
+                    </button>
+                    <button class="activity-card" data-actividad="pasos">
+                        <span class="icon">🪜</span>
+                        <strong>Paso a paso <em class="nuevo">¡nuevo!</em></strong>
+                        <small>Resuelve un paso en cada pregunta, hasta la solución.</small>
+                    </button>
+                    <button class="activity-card" data-actividad="arrastrar">
+                        <span class="icon">✋</span>
+                        <strong>Arrastrar</strong>
+                        <small>Resuelve el primer paso moviendo las piezas.</small>
+                    </button>
+                    <button class="activity-card" data-actividad="mezcla">
+                        <span class="icon">🧩</span>
+                        <strong>Todo junto</strong>
+                        <small>Las cuatro actividades mezcladas.</small>
+                    </button>
+                </div>
+
+                <div class="config-row">
+                    <span class="config-label">Nivel</span>
+                    <div class="segmented" id="level-seg">
+                        <button type="button" data-nivel="1">🌱 1</button>
+                        <button type="button" data-nivel="2">🌿 2</button>
+                        <button type="button" data-nivel="3">🌳 3</button>
+                        <button type="button" data-nivel="0">🎲 Mixto</button>
+                    </div>
+                </div>
+                <p class="config-hint" id="level-hint"></p>
+
+                <div class="config-row" id="time-row">
+                    <span class="config-label">Tiempo</span>
+                    <div class="segmented" id="time-seg">
+                        <button type="button" data-tiempo="30">30 s</button>
+                        <button type="button" data-tiempo="60">60 s</button>
+                        <button type="button" data-tiempo="90">90 s</button>
+                        <button type="button" data-tiempo="120">120 s</button>
+                    </div>
+                </div>
+
+                <div class="stack">
+                    <button id="btn-play" class="btn-primary">¡Empezar!</button>
+                </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PANTALLA 4: JUEGO -->
+        <section id="screen-game" class="screen hidden">
+            <div id="active-mode-display">
+                <span class="muted">[ MODO ]</span> <span id="current-mode-name" class="mode-name">MODO</span>
+                <span class="muted"> · </span><span id="current-activity-name" class="muted">ACTIVIDAD</span>
+            </div>
+
+            <header class="game-hud">
+                <button id="btn-abort" class="btn-icon danger-icon" title="Abandonar">✖ Abortar</button>
+                <div class="hud-item score-container" id="hud-score-container">
+                    <span class="hud-label">PUNTOS</span>
+                    <span id="hud-score" class="hud-value">0</span>
+                </div>
+                <div class="hud-item timer-container" id="hud-time-container">
+                    <span class="hud-label" id="hud-time-label">TIEMPO</span>
+                    <span id="hud-time" class="hud-value">00:00</span>
+                </div>
+                <div class="hud-item lives-container hidden" id="hud-lives-container">
+                    <span class="hud-label">VIDAS</span>
+                    <div id="hud-lives" class="hud-value">❤️❤️❤️</div>
+                </div>
+            </header>
+            <div id="streak-badge"></div>
+
+            <div class="game-board glass-panel">
+                <div id="step-indicator" class="step-indicator"></div>
+                <div id="question-text" class="question-display"></div>
+                <div id="question-area"></div>
+                <div id="answer-note" class="answer-note"></div>
+            </div>
+
+            <div id="feedback-overlay" class="feedback-fx"></div>
+        </section>
+
+        <!-- PANTALLA 5: RESULTADOS -->
+        <section id="screen-results" class="screen hidden">
+            <div class="glass-panel text-center">
+                <div class="panel-contenido">
+                <h2 class="section-title">¡Partida terminada!</h2>
+                <button id="btn-change-name" class="chip-jugador" type="button" title="Cambiar de jugador">👤 <span id="res-jugador"></span> · cambiar</button>
+                <div class="stats-display">
+                    <div class="stat-box">
+                        <span class="stat-label">Puntuación</span>
+                        <span id="res-score" class="stat-value accent">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Precisión</span>
+                        <span id="res-accuracy" class="stat-value">0%</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Racha máxima</span>
+                        <span id="res-streak" class="stat-value">0</span>
+                    </div>
+                </div>
+                <p id="res-detail" class="res-detail"></p>
+                <div id="res-repasar" class="res-repasar"></div>
+                <p id="res-message" class="celebration-text"></p>
+                <div class="action-buttons">
+                    <button id="btn-retry" class="btn-primary">🔄 Jugar otra vez</button>
+                    <div class="tiles">
+                        <button id="btn-otra-actividad" class="tile" type="button"><span class="t-ico">🎯</span><span class="t-txt">Otra actividad</span></button>
+                        <button class="tile" type="button" data-go="screen-ranking"><span class="t-ico">🏆</span><span class="t-txt">Ranking</span></button>
+                        <button class="tile" type="button" data-go="screen-home"><span class="t-ico">🏠</span><span class="t-txt">Menú principal</span></button>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PANTALLA 6: RANKING -->
+        <section id="screen-ranking" class="screen hidden">
+            <div class="glass-panel">
+                <button class="btn-icon back-btn" data-go="screen-home">← Volver</button>
+                <h2 class="section-title mb-4">Mejores jugadores</h2>
+
+                <div class="ranking-filter">
+                    <select id="ranking-mode-select" aria-label="Modo">
+                        <option value="timeattack_30">Contrarreloj · 30 s</option>
+                        <option value="timeattack_60">Contrarreloj · 60 s</option>
+                        <option value="timeattack_90">Contrarreloj · 90 s</option>
+                        <option value="timeattack_120">Contrarreloj · 120 s</option>
+                        <option value="sudden_death">Muerte Súbita</option>
+                        <option value="survival">Supervivencia</option>
+                    </select>
+                    <select id="ranking-activity-select" aria-label="Actividad">
+                        <option value="reconocer">¿Cuál va primero?</option>
+                        <option value="igualdad">Elige la igualdad</option>
+                        <option value="pasos">Paso a paso</option>
+                        <option value="arrastrar">Arrastrar</option>
+                        <option value="mezcla">Todo junto</option>
+                    </select>
+                </div>
+
+                <div class="ranking-table-container">
+                    <table class="ranking-table">
+                        <thead>
+                            <tr><th>#</th><th>Nombre</th><th>Puntos</th><th>Fecha</th></tr>
+                        </thead>
+                        <tbody id="ranking-body"></tbody>
+                    </table>
+                </div>
+                <p class="ranking-note">El ranking se guarda solo en este ordenador.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Opciones (ajustes.js · voz-ui.js · rendimiento.js · escala.js) -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="glass-panel panel-opciones">
+            <button class="close-x" data-close="settings-modal" aria-label="Cerrar">✕</button>
+            <h2 class="section-title">⚙️ Opciones</h2>
+            <div class="ajustes-grid">
+                <button id="music-toggle-button" class="ajuste" type="button" aria-pressed="true">
+                    <span class="aj-ico">🎵</span><span class="aj-tit">Música</span><span class="aj-sub">De fondo mientras juegas</span><span class="perf-switch" aria-hidden="true"></span>
+                </button>
+                <button id="sfx-toggle-button" class="ajuste" type="button" aria-pressed="true">
+                    <span class="aj-ico">🔊</span><span class="aj-tit">Efectos de sonido</span><span class="aj-sub">Aciertos, fallos y toques</span><span class="perf-switch" aria-hidden="true"></span>
+                </button>
+                <button id="voz-explica-button" class="ajuste" type="button" aria-pressed="true">
+                    <span class="aj-ico">🎬</span><span class="aj-tit">Explicación con voz</span><span class="aj-sub">Animada y narrada al fallar</span><span class="perf-switch" aria-hidden="true"></span>
+                </button>
+                <button id="perf-toggle-button" class="ajuste" type="button" aria-pressed="false">
+                    <span class="aj-ico">⚡</span><span class="aj-tit">Modo ligero</span><span class="aj-sub">Sin desenfoque si va lento</span><span class="perf-switch" aria-hidden="true"></span>
+                </button>
+                <button id="scale-toggle-button" class="ajuste ajuste-ancho" type="button" aria-pressed="true">
+                    <span class="aj-ico">🖥️</span><span class="aj-tit">Escala fija</span><span class="aj-sub" id="scale-toggle-info">Mismo aspecto con cualquier escala</span><span class="perf-switch" aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="aj-fondo">
+                <span class="aj-tit">🧑‍🏫 Explicar los fallos</span>
+                <div class="segmented" id="explicar-seg">
+                    <button type="button" data-explicar="no">🚫 No</button>
+                    <button type="button" data-explicar="practica">🎯 En práctica</button>
+                    <button type="button" data-explicar="siempre">✅ Siempre</button>
+                </div>
+                <button id="resp-toggle-button" class="aj-interruptor" type="button" aria-pressed="false">
+                    <span class="aj-ico">💡</span>
+                    <span class="aj-textos"><span class="aj-tit">Ver la respuesta al fallar</span><span class="aj-sub">La correcta, con el tiempo parado</span></span>
+                    <span class="perf-switch" aria-hidden="true"></span>
+                </button>
+                <span class="aj-sub aj-nota">Mientras se explica, el juego y el reloj se paran. En práctica, sin explicación, sale siempre la respuesta.</span>
+            </div>
+            <div class="aj-fondo">
+                <span class="aj-tit">🗣️ Voz de las explicaciones</span>
+                <div class="segmented" id="voz-motor-seg">
+                    <button type="button" data-motor="piper">🎙️ Piper</button>
+                    <button type="button" data-motor="web">🌐 Navegador</button>
+                    <button type="button" id="voz-probar-button">🔊 Probar</button>
+                </div>
+                <span class="aj-sub aj-nota" id="voz-motor-info"></span>
+            </div>
+            <div class="aj-fondo">
+                <span class="aj-tit">✨ Fondo animado</span>
+                <div class="segmented" id="bg-seg">
+                    <button type="button" data-fondo="numeros">🔢 Números</button>
+                    <button type="button" data-fondo="puntos">⚫ Puntos</button>
+                    <button type="button" data-fondo="none">🚫 Ninguno</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cambio de jugador -->
+    <div id="modal-change-name" class="modal-overlay hidden">
+        <div class="glass-panel panel-sm text-center">
+            <h2 class="section-title">¿Quién juega?</h2>
+            <input type="text" id="new-player-name" placeholder="Escribe tu nombre..." autocomplete="off" maxlength="15">
+            <div class="dialog-actions">
+                <button id="btn-name-cancel" class="btn-secondary">Cancelar</button>
+                <button id="btn-name-ok" class="btn-primary">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="bucle.js?v=1.1.0"></script>
+    <script src="operaciones.js?v=1.1.0"></script>
+    <script src="sonido.js?v=1.1.0"></script>
+    <script src="fondo.js?v=1.1.0"></script>
+    <script src="efectos.js?v=1.1.0"></script>
+    <script src="voz.js?v=1.1.0"></script>
+    <script src="infografia.js?v=1.1.0"></script>
+    <script src="explicacion.js?v=1.1.0"></script>
+    <script src="ajustes.js?v=1.1.0"></script>
+    <script src="voz-ui.js?v=1.1.0"></script>
+    <script src="arrastre.js?v=1.1.0"></script>
+    <script src="app.js?v=1.1.0"></script>
+</body>
+
+</html>

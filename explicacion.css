@@ -1,0 +1,205 @@
+/* =========================================================
+   Voz (Piper) · indicador de carga y explicación animada con voz
+   La escena (.ig-lienzo) está en «em» y px: la operación, el dibujo de puntos y las cuentas se miden en JS (infografia.js · encajar)
+   para que todo quepa sin cortes ni scroll.
+   ========================================================= */
+.voz-carga {
+    position: fixed; top: max(0.6rem, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 450;
+    display: flex; flex-direction: column; gap: 0.3rem; align-items: stretch; min-width: 15rem; padding: 0.5rem 0.9rem;
+    border-radius: 1rem; background: rgba(14, 30, 70, 0.95); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow);
+    font-size: 0.85rem; color: var(--text-main); pointer-events: none; transition: opacity 0.4s;
+}
+.voz-carga.hidden { display: none; }
+.voz-carga.fuera { opacity: 0; }
+.voz-carga .barra { height: 0.35rem; border-radius: 1rem; background: rgba(255, 255, 255, 0.14); overflow: hidden; }
+.voz-carga .barra i { display: block; height: 100%; width: 0; border-radius: 1rem; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 0.25s; }
+.voz-carga.error { border-color: var(--danger); color: var(--danger); }
+/* en pantallas estrechas el aviso va abajo (arriba tapaba el botón de opciones); es transitorio */
+html.estrecho .voz-carga { top: auto; bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+
+/* ---------- Ventana ---------- */
+.ig-box { max-width: 56rem; width: 100%; height: min(42rem, 100%); display: flex; flex-direction: column; gap: 0.5rem; text-align: center; padding: 1rem 1.4rem 1.1rem; max-height: 100%; overflow: hidden; }
+.ig-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding-right: 2.6rem; min-height: 1.6rem; }
+.ig-claqueta { font-family: var(--font-display); font-weight: 400; color: var(--primary-glow); letter-spacing: 0.05rem; white-space: nowrap; }
+.ig-voz-estado { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
+.ig-puntos { display: flex; gap: 0.35rem; margin-left: auto; }
+.ig-punto { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: rgba(255, 255, 255, 0.18); transition: background 0.3s; position: relative; border: none; padding: 0; cursor: pointer; }
+.ig-punto::after { content: ''; position: absolute; inset: -0.45rem; }
+.ig-punto:hover { transform: scale(1.4); }
+.ig-punto.hecho { background: var(--good); }
+.ig-punto.ahora { background: var(--secondary); box-shadow: 0 0 0.5rem var(--secondary); }
+
+.ig-escenario { position: relative; flex: 1 1 0; min-height: 11rem; display: flex; flex-direction: column; align-items: stretch; justify-content: center; padding: 0.2rem 0; overflow: hidden; }
+.ig-lienzo { --ig-tam: 3.2rem; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0.5rem; width: 100%; height: 100%; }
+
+@keyframes igPop { from { opacity: 0; transform: scale(0.5) translateY(0.5rem); } to { opacity: 1; transform: none; } }
+
+/* etiquetas de arriba: tu respuesta / la correcta (se ven durante toda la explicación) */
+.ig-pildoras { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: nowrap; min-height: 2.1rem; white-space: nowrap; flex: 0 0 auto; }
+.ig-pill { opacity: 0; padding: 0.35rem 0.9rem; border-radius: 2rem; font-size: 0.95rem; border: 1px solid; font-weight: 400; }
+.ig-pill b { font-family: var(--font-word); }
+.ig-pill.mal { color: var(--danger); border-color: rgba(255, 93, 143, 0.55); background: rgba(255, 93, 143, 0.1); }
+.ig-pill.bien { color: var(--good); border-color: rgba(91, 227, 161, 0.55); background: rgba(91, 227, 161, 0.1); }
+.ig-pill.ver { animation: igPop 0.5s cubic-bezier(0.2, 1.5, 0.4, 1) both; }
+
+/* la operación */
+.ig-exprzona { position: relative; flex: 0 0 auto; padding-top: 2.5rem; width: 100%; display: flex; justify-content: center;  transition: margin-top 0.7s ease; }
+/* sin dibujo todavía: la operación queda a media altura y baja suavemente cuando aparece */
+.ig-lienzo.vacio .ig-exprzona { margin-top: 3.8rem; }
+html.estrecho .ig-lienzo.vacio .ig-exprzona { margin-top: 2.6rem; }
+.ig-bocadillo {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%) scale(0.8); white-space: nowrap; opacity: 0;
+    padding: 0.3rem 0.9rem; border-radius: 1rem; background: rgba(255, 210, 63, 0.16); border: 1px solid var(--accent); color: var(--accent); font-size: 0.95rem; font-weight: 700;
+}
+.ig-bocadillo.ver { animation: igBocadillo 0.4s cubic-bezier(0.2, 1.5, 0.4, 1) both; }
+@keyframes igBocadillo { from { opacity: 0; transform: translateX(-50%) scale(0.6); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+.ig-expr { position: relative; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; white-space: nowrap; font-family: var(--font-word); font-weight: 700; font-size: var(--ig-tam, 3.2rem); line-height: 1.2; min-height: 1.25em; }
+.ig-medida { position: absolute; visibility: hidden; left: 0; top: 0; width: max-content; }
+.tk { display: inline-block; color: #f3f6ff; text-shadow: 0 0.04em 0 rgba(0, 0, 0, 0.3); transition: color 0.35s, text-shadow 0.35s; }
+.tk-o { color: var(--text-muted); padding: 0 0.16em; font-weight: 400; }
+.tk-p { font-weight: 400; opacity: 0.9; padding: 0 0.02em; }
+.ig-expr.colores .tk.rol-a { color: var(--c-a); text-shadow: 0 0 0.5em rgba(255, 210, 63, 0.35); }
+.ig-expr.colores .tk.rol-b { color: var(--c-b); text-shadow: 0 0 0.5em rgba(90, 169, 255, 0.35); }
+.ig-expr.colores .tk.rol-c { color: var(--c-c); text-shadow: 0 0 0.5em rgba(255, 138, 91, 0.35); }
+.ig-expr.colores .tk.rol-d { color: var(--c-d); text-shadow: 0 0 0.5em rgba(199, 155, 255, 0.35); }
+.ig-expr.colores .tk.rol-e { color: var(--c-e); text-shadow: 0 0 0.5em rgba(255, 134, 214, 0.35); }
+.ig-expr.colores .tk.rol-r { color: var(--good); text-shadow: 0 0 0.5em rgba(91, 227, 161, 0.35); }
+.tk.fantasma { position: absolute; pointer-events: none; }
+.tk.pulso { animation: tkPulso 0.9s ease-in-out 3; }
+@keyframes tkPulso { 50% { transform: translateY(-0.1em) scale(1.28); } }
+.ig-expr .tk.malo { color: var(--danger) !important; text-shadow: 0 0 0.5em rgba(255, 93, 143, 0.7) !important; }
+
+/* zona central: el dibujo de puntos, las cuentas o la regla (una a la vez, en el mismo sitio: nada se mueve) */
+.ig-centro { position: relative; flex: 1 1 0; min-height: 7rem; width: 100%; }
+.ig-centro > * { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity 0.45s ease; }
+.ig-centro[data-vista="modelo"] > .ig-modelo, .ig-centro[data-vista="calculos"] > .ig-calculos, .ig-centro[data-vista="insignia"] > .ig-insignia { opacity: 1; }
+
+/* el dibujo: a filas de (b + c) puntos */
+.ig-modelo { display: flex; align-items: center; justify-content: center; --u: 1.6rem; font-size: 1.1rem; }
+.mod-cuerpo {
+    display: grid; grid-template-columns: auto auto auto; grid-template-rows: 1.8em auto 2.8em; column-gap: 0; align-items: end; justify-items: center;
+    opacity: 0; transform: scale(0.9); transition: opacity 0.6s, transform 0.6s, column-gap 0.9s cubic-bezier(0.45, 0, 0.2, 1);
+}
+.ig-modelo.vis .mod-cuerpo { opacity: 1; transform: none; }
+.ig-modelo.sep .mod-cuerpo { column-gap: 1.3em; }
+.mod-izq { grid-column: 1; grid-row: 2; align-self: center; margin-right: 0.5em; padding-right: 0.5em; border-right: 0.18em solid var(--c-a); color: var(--c-a); font-family: var(--font-word); font-weight: 700; height: 100%; display: flex; align-items: center; min-width: 1.2em; justify-content: center; }
+.mod-top { grid-row: 1; font-family: var(--font-word); font-weight: 700; padding: 0.05em 0; white-space: nowrap; border-bottom: 0.18em solid; width: 100%; text-align: center; transition: opacity 0.4s; }
+.mod-top-b { grid-column: 2; color: var(--c-b); border-color: var(--c-b); }
+.mod-top-c { grid-column: 3; color: var(--c-c); border-color: var(--c-c); }
+.mod-top-todo { grid-column: 2 / 4; color: #fff; border-color: rgba(255, 255, 255, 0.7); opacity: 0; }
+.mod-top-todo .t-largo { display: none; }
+.mod-rect {
+    position: relative; grid-row: 2; width: calc(var(--cb) * var(--u)); height: calc(var(--filas) * var(--u)); display: flex; align-items: center; justify-content: center;
+    background-image: radial-gradient(circle at center, var(--col) 0 26%, transparent 29%); background-size: var(--u) var(--u); background-color: var(--fondo);
+    border-radius: 0.3em; transition: opacity 0.6s, transform 0.9s cubic-bezier(0.45, 0, 0.2, 1), box-shadow 0.4s;
+}
+.sin-puntos .mod-rect { background-image: none; background-color: var(--col); }
+.mod-b { grid-column: 2; --col: var(--c-b); --fondo: rgba(90, 169, 255, 0.16); }
+.mod-c { grid-column: 3; --col: var(--c-c); --fondo: rgba(255, 138, 91, 0.16); width: calc(var(--cc) * var(--u)); }
+.mod-b { width: calc(var(--cb) * var(--u)); }
+/* rótulos «a × b = X» bajo cada bloque: ancho 0 para no ensanchar la columna del bloque (se centran sobre él) */
+.mod-prod { grid-row: 3; width: 0; display: flex; flex-direction: column; align-items: center; justify-self: center; margin-top: 0.3em; opacity: 0; transform: translateY(-0.3em);
+    white-space: nowrap; color: #fff; font-family: var(--font-word); font-weight: 700; font-size: 0.95em; line-height: 1.2; pointer-events: none; transition: opacity 0.5s, transform 0.5s; }
+.mod-prod span { flex: none; }
+.mod-prod-b { grid-column: 2; } .mod-prod-b span:first-child { color: var(--c-b); }
+.mod-prod-c { grid-column: 3; } .mod-prod-c span:first-child { color: var(--c-c); }
+.eti-b .mod-prod-b, .eti-c .mod-prod-c { opacity: 1; transform: none; }
+/* con resta: el naranja es lo que se quita (rayado) y el azul lo que queda */
+.ig-modelo.resta .mod-c { background-image: radial-gradient(circle at center, var(--col) 0 26%, transparent 29%), repeating-linear-gradient(45deg, rgba(255, 138, 91, 0.3) 0 0.35em, transparent 0.35em 0.7em); background-size: var(--u) var(--u), auto; }
+.ig-modelo.resta .mod-top-b { opacity: 0; }
+.ig-modelo.resta.quitado .mod-top-b { opacity: 1; }
+.ig-modelo.resta .mod-top-todo { opacity: 1; }
+.ig-modelo.resta.quitado .mod-top-todo, .ig-modelo.resta.quitado .mod-top-c { opacity: 0; }
+.ig-modelo.resta.eti .mod-top-c { opacity: 0; }
+.ig-modelo.resta.eti .mod-top-todo .t-corto { display: none; }
+.ig-modelo.resta.eti .mod-top-todo .t-largo { display: inline; }
+.ig-modelo.resta.quitado .mod-c { opacity: 0.22; transform: translate(0.9em, -0.3em); }
+.ig-modelo.resta .mod-prod-b { display: none; }
+.ig-modelo.resta.quitado .mod-prod-b { display: flex; }
+.ig-modelo.resta.quitado .mod-prod-c { opacity: 0 !important; }
+/* con suma: al juntar, un solo rótulo «b + c» */
+.ig-modelo:not(.resta).unido .mod-top-b, .ig-modelo:not(.resta).unido .mod-top-c { opacity: 0; }
+.ig-modelo:not(.resta).unido .mod-top-todo { opacity: 1; }
+.ig-modelo:not(.resta).unido .mod-rect { box-shadow: 0 0 0 0.12em rgba(255, 255, 255, 0.0); }
+.late { animation: igLate 0.8s ease-in-out 3; }
+@keyframes igLate { 50% { transform: scale(1.22); filter: brightness(1.5); } }
+.mod-rect.late { animation: igLateR 0.8s ease-in-out 3; }
+@keyframes igLateR { 50% { transform: scale(1.04); filter: brightness(1.6); } }
+
+/* las cuentas de comprobación */
+.ig-calculos { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5em; font-size: 2rem; }
+.calc-linea { font-family: var(--font-word); font-weight: 700; white-space: nowrap; max-width: 100%; text-align: center; opacity: 0; transform: translateY(0.5em); transition: opacity 0.5s, transform 0.5s; color: #f3f6ff; }
+.calc-linea.ver { opacity: 1; transform: none; }
+.calc-linea b { color: var(--accent); }
+.calc-marca { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.04em; font-size: 1.5em; min-height: 1.4em; opacity: 0; transform: scale(0.5); }
+.calc-marca.ver { opacity: 1; transform: none; transition: opacity 0.4s, transform 0.5s cubic-bezier(0.2, 1.6, 0.4, 1); }
+.calc-marca.ok { color: var(--good); text-shadow: 0 0 1rem rgba(91, 227, 161, 0.6); }
+.calc-marca.mal { color: var(--danger); text-shadow: 0 0 1rem rgba(255, 93, 143, 0.6); }
+.ig-mal { color: var(--danger) !important; }
+.ig-bien { color: var(--good) !important; }
+
+/* la regla (o «no se puede») */
+.ig-insignia { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4em; font-size: 1rem; transform: scale(0.9); transition: opacity 0.5s, transform 0.5s cubic-bezier(0.2, 1.5, 0.4, 1); }
+.ig-centro[data-vista="insignia"] > .ig-insignia.ver { transform: none; }
+.ins-titulo { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.08em; font-size: 2.1em; text-transform: uppercase; }
+.ins-regla { font-family: var(--font-word); font-weight: 700; font-size: 1.9em; white-space: nowrap; max-width: 100%; color: #f3f6ff; }
+.ins-sub { font-size: 1em; color: var(--text-muted); max-width: 90%; line-height: 1.35; }
+.ig-insignia.si .ins-titulo { color: var(--good); text-shadow: 0 0 1.2rem rgba(91, 227, 161, 0.55); }
+.ig-insignia.no .ins-titulo { color: var(--danger); text-shadow: 0 0 1.2rem rgba(255, 93, 143, 0.55); }
+.ig-nopuede { font-family: var(--font-word); font-weight: 700; font-size: 1em; color: #f3f6ff; position: relative; }
+.ig-nopuede::after { content: ''; position: absolute; left: -0.1em; right: -0.1em; top: 50%; height: 0.1em; background: var(--danger); transform: rotate(-4deg); border-radius: 1em; }
+
+/* subtítulo y navegación */
+.ig-subtitulo { min-height: 5.8rem; max-width: 50rem; margin: 0 auto; font-size: 1.3rem; line-height: 1.5; color: var(--text-main); opacity: 0; transform: translateY(0.4rem); font-weight: 400; display: block; }
+.ig-subtitulo.ver { opacity: 1; transform: none; transition: opacity 0.4s, transform 0.4s; }
+.ig-subtitulo b { font-weight: 700; color: #fff; }
+.ig-subtitulo b.rol-a { color: var(--c-a); } .ig-subtitulo b.rol-b { color: var(--c-b); } .ig-subtitulo b.rol-c { color: var(--c-c); } .ig-subtitulo b.rol-d { color: var(--c-d); } .ig-subtitulo b.rol-e { color: var(--c-e); } .ig-subtitulo b.rol-r { color: var(--good); }
+.ig-subtitulo b.ig-mal { color: var(--danger); } .ig-subtitulo b.ig-bien { color: var(--good); }
+.ig-subtitulo small { color: var(--text-muted); }
+.ig-acciones { margin-top: 0.2rem; }
+.ig-acciones button { min-width: 11rem; }
+.ig-ok { min-width: 19.5rem !important; white-space: nowrap; font-size: 1rem; letter-spacing: 0.04rem; padding: 0.8rem 1.4rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; }
+.ig-nav { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: nowrap; }
+.ig-nav button { width: auto; max-width: none; padding: 0.55rem 1.1rem; font-size: 0.95rem; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; }
+.ig-nav button:disabled { opacity: 0.35; }
+.ig-ico { display: inline-flex; align-items: center; justify-content: center; }
+.ig-ico svg { width: 1.15em; height: 1.15em; fill: currentColor; display: block; }
+.ig-ico svg.trazo { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* explicación escrita (sin voz) */
+.ex-box { max-width: 44rem; max-height: 100%; overflow-y: auto; text-align: left; padding: 1.3rem 1.6rem 1.4rem; }
+.ex-cabecera { text-align: center; margin-bottom: 0.6rem; }
+.ex-titulo { font-family: var(--font-display); font-weight: 400; color: var(--primary-glow); font-size: 1.4rem; margin: 0.2rem 0; }
+.ex-expr { font-family: var(--font-word); font-weight: 700; font-size: 2rem; text-align: center; margin: 0.3rem 0; white-space: nowrap; }
+.ex-pasos { padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.7rem; margin: 0.6rem 0 0.4rem; font-weight: 400; line-height: 1.5; font-size: 1.05rem; }
+.ex-pasos > li::marker { color: var(--accent); font-weight: 700; }
+.ex-pasos b { color: #fff; }
+.ex-pasos b.rol-a { color: var(--c-a); } .ex-pasos b.rol-b { color: var(--c-b); } .ex-pasos b.rol-c { color: var(--c-c); } .ex-pasos b.rol-d { color: var(--c-d); } .ex-pasos b.rol-e { color: var(--c-e); } .ex-pasos b.rol-r { color: var(--good); }
+.ex-pasos b.ig-mal { color: var(--danger); } .ex-pasos b.ig-bien { color: var(--good); }
+.ex-regla { text-align: center; margin-top: 0.6rem; padding: 0.6rem; border-radius: 0.9rem; background: rgba(110, 231, 208, 0.08); font-family: var(--font-word); font-weight: 700; font-size: 1.35rem; white-space: nowrap; overflow: hidden; }
+
+/* ---------- Pantallas estrechas ---------- */
+html.estrecho .ig-box { padding: 0.8rem 0.8rem 0.9rem; height: 100%; }
+html.estrecho .ig-voz-estado { display: none; }
+html.estrecho .ig-claqueta { white-space: nowrap; }
+html.estrecho .ig-escenario { min-height: 11rem; }
+html.estrecho .ig-subtitulo { font-size: 1.05rem; min-height: 6.6rem; }
+html.estrecho .ig-acciones { flex-wrap: nowrap; }
+html.estrecho .ig-ok { min-width: 0 !important; width: 100%; font-size: 0.95rem; letter-spacing: 0; padding: 0.8rem 0.5rem; }
+html.estrecho .ig-nav { gap: 0.4rem; }
+html.estrecho .ig-nav button { flex: 1 1 0; padding: 0.55rem 0.2rem; font-size: 1.15rem; }
+html.estrecho .ig-nav .ig-txt { display: none; }
+html.estrecho .ig-nav .ig-ico svg { width: 1.45em; height: 1.45em; }
+/* las dos etiquetas una encima de la otra, así no se cortan por los lados con textos largos */
+html.estrecho .ig-pildoras { flex-direction: column; align-items: center; gap: 0.35rem; min-height: 4.4rem; white-space: normal; max-width: 100%; }
+html.estrecho .ig-pill { font-size: 0.92rem; padding: 0.3rem 0.8rem; white-space: normal; max-width: 100%; line-height: 1.25; }
+html.estrecho .ig-exprzona { padding-top: 2.3rem; }
+html.estrecho .ig-calculos { font-size: 1.5rem; }
+html.estrecho .ig-modelo { font-size: 0.95rem; }
+html.estrecho .ins-titulo { font-size: 1.7em; }
+html.estrecho .ins-regla { font-size: 1.5em; }
+html.estrecho .ex-box { padding: 1.2rem 0.9rem; }
+html.estrecho .ex-pasos { font-size: 1rem; }
+html.corta .ig-subtitulo { min-height: 5.4rem; font-size: 0.95rem; }
+html.corta .ig-pildoras { min-height: 3.6rem; }
+html.corta .ig-exprzona { padding-top: 1.9rem; }
