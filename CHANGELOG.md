@@ -2,6 +2,9 @@
 
 Formato de versión: `X.Y.Z`, igual que el número que llevan los archivos en `index.html` (`?v=…`) y la cinta del menú principal.
 
+## [1.2.13] - 2026-10-28
+- **Carteles de velocidad centrados** en «Paso a paso»: ahora quedan a la misma distancia del texto de la pregunta (arriba) que de las operaciones del historial (abajo). Se mide el texto real y no la caja de la pregunta, que es más alta que su última línea y los dejaba demasiado bajos.
+
 ## [1.2.12] - 2026-10-28
 - **Carteles de «¡Velocidad luz!» y «¡Qué rápido!» en «Paso a paso»**: ya no suben flotando por encima de las operaciones que se reducen y suben. Ahora se quedan quietos justo encima del historial (en el hueco entre la pregunta y las operaciones), con un pequeño rebote al aparecer y un desvanecimiento al irse; si el hueco es pequeño (móvil) el cartel se reduce hasta caber. En las demás actividades siguen como antes.
 

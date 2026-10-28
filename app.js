@@ -729,11 +729,14 @@ const app = {
         const area = this.$('question-area'), hist = this.state.q && this.state.q.tipo === 'pasos' && area.querySelector('.historial');
         if (hist) {
             pop.classList.add('fija');
-            const tabla = board.getBoundingClientRect(), tope = this.$('question-text').getBoundingClientRect().bottom - tabla.top;
+            const tabla = board.getBoundingClientRect(), rango = document.createRange();
+            rango.selectNodeContents(this.$('question-text'));          // el texto real (la caja de la pregunta es más alta que su última línea)
+            const tope = rango.getBoundingClientRect().bottom - tabla.top;
             let tam = parseFloat(getComputedStyle(pop).fontSize);
-            const colocar = () => { pop.style.top = (hist.getBoundingClientRect().top - tabla.top - pop.offsetHeight - 2) + 'px'; };
+            // centrado en vertical entre el texto de la pregunta (arriba) y el historial (abajo); si no cabe, más pequeño
+            const colocar = () => { const hueco = hist.getBoundingClientRect().top - tabla.top - tope; pop.style.top = (tope + (hueco - pop.offsetHeight) / 2) + 'px'; return hueco; };
+            while (colocar() < pop.offsetHeight && tam > 12) { tam -= 1; pop.style.fontSize = tam + 'px'; }
             colocar();
-            while (parseFloat(pop.style.top) < tope && tam > 12) { tam -= 1; pop.style.fontSize = tam + 'px'; colocar(); }
         }
         setTimeout(() => pop.remove(), 1200);
     },
