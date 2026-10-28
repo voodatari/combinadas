@@ -2,6 +2,16 @@
 
 Formato de versión: `X.Y.Z`, igual que el número que llevan los archivos en `index.html` (`?v=…`) y la cinta del menú principal.
 
+## [1.2.2] - 2026-10-28
+- **Consigna en voz alta**: la primera vez que sale cada tipo de pregunta en una partida se lee lo que se pide, una sola vez: «¿Qué operación hay que resolver primero?» (¿Cuál va primero?), «¿Qué operación vale lo mismo?» (Elige la igualdad), «¿Qué operación queda en cada paso?» (Paso a paso) y «Resuelve el primer paso y arrastra lo que queda» (Arrastrar). En «Todo junto» se dice cada una la primera vez que aparece. Respeta «Explicación con voz» (desactivada, no habla) y nunca espera a que cargue Piper; con Piper se sintetiza por adelantado al empezar la partida.
+
+## [1.2.1] - 2026-10-28
+- **Cinta de versión**: sobresalía por la esquina redondeada de la tarjeta del menú principal (pisaba el borde, sobre todo en móvil). Ahora se recorta por dentro del borde y con la esquina redondeada igual que la tarjeta.
+- **Opciones con «Escala fija»**: al abrirlas, el contenido se reducía en dos pasos (uno al abrir y otro a los 0,35 s) y se notaba un «rebote» de tamaño. Ahora el tamaño se calcula una sola vez, a partir del alto natural del panel y antes de que termine de entrar, así que sale siempre igual y no se mueve.
+- **Voz del navegador**
+  - iPhone: Safari solo deja hablar si la primera locución se inicia dentro de un toque, y el juego la pedía tarde. Ahora se lanza una locución muda en el primer toque (esté o no activado ese motor) y otra al empezar cada «Probar»/explicación, y se reanuda la síntesis si estaba en pausa. Si el navegador no llega a reproducir una frase (2,5 s sin arrancar), la explicación sigue con los tiempos de lectura en vez de quedarse parada, y la nota de Opciones avisa de que no ha sonado.
+  - Windows: la lista de voces se vuelve a leer cuando se necesita (algunos navegadores la rellenan tarde y no avisan) y también se aceptan voces cuyo idioma viene mal pero cuyo nombre dice «Spanish/Español». Si de verdad no hay voz en español, la nota explica cómo tenerla: Edge trae voces online, o añadir el español en Configuración → Hora e idioma → Idioma y región → Español → Voz.
+
 ## [1.2.0] - 2026-10-28
 - **Tema visual nuevo: «Arcade galáctico»** (`web/tema.css`, pensado para 5.º). Espacio con estrellas que se desplazan, un planeta y una luna; paneles con contorno oscuro grueso y filo de luz; botones de arcade que se hunden al pulsar (verde para lo principal); los cuatro modos son cartas de colores (azul, rosa, naranja y verde); respuestas como teclas de arcade (se ponen verdes o rojas al contestar); título tipo pegatina; números en Fredoka (redondeada) y títulos en Lilita One. Los colores con significado (números, resultados, operaciones) no cambian. Solo toca el aspecto: quitando el `<link>` de `tema.css` en `index.html` vuelve el cuaderno cuadriculado.
 - **Cuentas de cabeza en todos los niveles y actividades**: ningún número ni resultado pasa de 100, las multiplicaciones son de tablas (un factor de 10 o menos, producto hasta 100) y las divisiones son entre 10 o menos. Lo mismo vale para las respuestas malas, la bandeja de «Arrastrar» y los resultados que enseña la explicación (antes salían cosas como `17 × 200` o 3400).

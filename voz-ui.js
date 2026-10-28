@@ -35,9 +35,12 @@ window.VozUI = (function () {
             b.classList.toggle('selected', b.dataset.motor === m);
             if (b.dataset.motor === 'web') { b.disabled = !web; b.title = web ? '' : 'Este navegador no tiene síntesis de voz'; }
         });
-        infoMotor.textContent = m === 'web'
-            ? (Voz.estado() === 'error' ? 'Este dispositivo no tiene ninguna voz en español instalada: las explicaciones se leerán sin voz.' : 'Usa la voz del dispositivo' + (nombre ? ': ' + nombre : '') + '. No descarga nada.')
-            : 'Voz natural que funciona sin conexión. La primera vez descarga unos 75 MB.';
+        var texto;
+        if (m !== 'web') texto = 'Voz natural que funciona sin conexión. La primera vez descarga unos 75 MB.';
+        else if (Voz.estado() === 'error') texto = 'No hay ninguna voz en español instalada en este dispositivo. Prueba con Microsoft Edge (trae voces online) o añade el español en Windows: Configuración → Hora e idioma → Idioma y región → Español → Voz. Mientras, las explicaciones se leen sin voz.';
+        else if (Voz.webMudo()) texto = 'El navegador no ha reproducido la voz' + (nombre ? ' (' + nombre + ')' : '') + '. Pulsa «Probar» otra vez, sube el volumen o usa Piper.';
+        else texto = 'Usa la voz del dispositivo' + (nombre ? ': ' + nombre : '') + '. No descarga nada.';
+        infoMotor.textContent = texto;
         if (window.ajustarOpciones) ajustarOpciones();      // el texto puede ocupar otra línea
     }
 
@@ -96,7 +99,8 @@ window.VozUI = (function () {
     });
     botonProbar.addEventListener('click', function () {
         sonar();
-        Voz.decir('Primero el paréntesis, luego las multiplicaciones y las divisiones, y al final las sumas y las restas.', { pausa: 300 });
+        /* sin esperas antes: la voz del navegador en iPhone solo arranca si se pide dentro del toque */
+        Voz.decir('Primero el paréntesis, luego las multiplicaciones y las divisiones, y al final las sumas y las restas.', { pausa: 300 }).then(function () { pintarMotor(); });
     });
     Voz.alCambiarVozWeb(pintarMotor);
 

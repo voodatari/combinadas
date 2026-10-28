@@ -226,12 +226,15 @@ var VozWeb = (function () {
 
     var sint = window.speechSynthesis, soportada = !!(sint && window.SpeechSynthesisUtterance);
     var voz = null, token = 0, hablando = 0, rapidoAct = false, actual = null, sinVozEspanola = false, promesaVoces = null;
+    var desbloqueada = false;             // iOS solo deja hablar tras una locución iniciada en un toque
+    var mudo = false;                     // la última locución no llegó a sonar: se sigue sin voz (con los tiempos de lectura) hasta el siguiente toque
     var avisos = [];                      // quien quiera saber cuándo cambia la voz elegida
 
     /* Cuánto se parece una voz instalada a la que queremos (-1 = no sirve: no es español) */
     function puntuar(v) {
         var n = (v.name || '').toLowerCase(), l = (v.lang || '').toLowerCase().replace('_', '-'), p = 0;
-        if (l.indexOf('es') !== 0) return -1;
+        var esES = l.indexOf('es') === 0 || /spa(n|ñ)ish|espa(n|ñ)ol|castellano/.test(n);        // algunos sistemas dan mal el idioma pero sí el nombre
+        if (!esES) return -1;
         p += l === 'es-es' ? 50 : (l === 'es-mx' || l === 'es-us' || l === 'es-419') ? 12 : 6;
         if (/natural|neural|online/.test(n)) p += 40;                                                             // voces neuronales (Edge)
         if (/google/.test(n)) p += 25;                                                                            // Chrome
@@ -247,7 +250,8 @@ var VozWeb = (function () {
         if (mejor !== voz) { voz = mejor; avisos.forEach(function (f) { try { f(voz); } catch (e) {} }); }
         return voz;
     }
-    /* Los navegadores cargan la lista de voces en segundo plano: se espera a que llegue (o 1,5 s como mucho) */
+    /* Los navegadores cargan la lista de voces en segundo plano (Safari ni siquiera avisa con «voiceschanged»): se espera a que llegue
+       o 1,5 s como mucho, y la lista se vuelve a leer cada vez que se necesita */
     function cargarVoces() {
         if (promesaVoces) return promesaVoces;
         promesaVoces = new Promise(function (ok) {
@@ -263,6 +267,7 @@ var VozWeb = (function () {
     function iniciar(progreso) {
         if (!soportada) { if (progreso) progreso(0, 'error'); return Promise.reject(new Error('Este navegador no tiene síntesis de voz')); }
         return cargarVoces().then(function () {
+            elegirVoz();
             if (sinVozEspanola) { if (progreso) progreso(0, 'error'); throw new Error('No hay ninguna voz en español instalada'); }
             if (progreso) progreso(1, 'lista');
         });
@@ -278,18 +283,21 @@ var VozWeb = (function () {
         if (hablando) { hablando = 0; atenuar(false, rapidoAct); }
     }
 
+    /* Habla una frase; devuelve true si de verdad llegó a sonar (si no arranca en 2,5 s, se da por perdida) */
     function hablar(texto, vel) {
         return new Promise(function (ok) {
-            var u = new SpeechSynthesisUtterance(texto), terminada = false, seguro;
+            var u = new SpeechSynthesisUtterance(texto), terminada = false, empezo = false, seguro, arranque;
             u.lang = voz ? voz.lang : 'es-ES';
             if (voz) u.voice = voz;
             u.rate = Math.max(0.6, Math.min(1.5, 0.95 * (vel || 1)));
             u.pitch = 1; u.volume = 1;
-            function fin() { if (terminada) return; terminada = true; clearTimeout(seguro); if (actual === u) actual = null; ok(); }
+            function fin() { if (terminada) return; terminada = true; clearTimeout(seguro); clearTimeout(arranque); if (actual === u) actual = null; ok(empezo); }
+            u.onstart = function () { empezo = true; };
             u.onend = fin; u.onerror = fin;
             actual = u;                                                  // si nadie guarda la locución, Chrome puede no avisar de que ha terminado
             seguro = setTimeout(fin, 4000 + texto.length * 170);         // por si algún navegador no avisa
-            try { sint.speak(u); } catch (e) { fin(); }
+            arranque = setTimeout(function () { if (!empezo) fin(); }, 2500);
+            try { if (sint.paused) sint.resume(); sint.speak(u); } catch (e) { fin(); }
         });
     }
 
@@ -304,12 +312,25 @@ var VozWeb = (function () {
         return out;
     }
 
+    /* iOS (y algunos móviles) solo dejan hablar si la primera locución se inicia DENTRO de un toque: se lanza una muda en el primer toque
+       y, además, al empezar cada decir() (que en un botón va todavía dentro del toque) */
+    function desbloquear() {
+        if (!soportada || desbloqueada) return;
+        desbloqueada = true;
+        try { var u = new SpeechSynthesisUtterance('a'); u.volume = 0; u.lang = 'es-ES'; sint.speak(u); } catch (e) { desbloqueada = false; }
+    }
+    ['click', 'touchend', 'keydown'].forEach(function (ev) {
+        document.addEventListener(ev, function () { desbloquear(); mudo = false; }, { capture: true, passive: true });
+    });
+
     async function decir(texto, opciones) {
         opciones = opciones || {};
         if (!soportada) return false;
         parar();
+        desbloquear();                                                   // síncrono: todavía dentro del toque que lo pidió
         var miToken = token;
         await cargarVoces();
+        elegirVoz();
         if (miToken !== token || sinVozEspanola) return false;
         var lista = normalizar(texto, opciones.pausa || 0);
         if (!lista.length) return false;
@@ -319,10 +340,14 @@ var VozWeb = (function () {
             if (miToken !== token) return false;
             if (!(await pausar(60, miToken))) return false;              // Chrome pierde la primera locución si llega justo después de un cancel()
             for (var i = 0; i < lista.length; i++) {
-                var f = lista[i];
-                if (opciones.alFrase) { try { opciones.alFrase(i, lista.length, Math.max(1, f.texto.length * 0.065), f.seg, null, undefined); } catch (e) {} }
-                await hablar(f.texto, (opciones.vel || 1) * (f.vel || 1));
-                if (miToken !== token) return false;
+                var f = lista[i], duracion = Math.max(1, f.texto.length * 0.065);
+                if (opciones.alFrase) { try { opciones.alFrase(i, lista.length, duracion, f.seg, null, undefined); } catch (e) {} }
+                if (mudo) { if (!(await pausar(800 + f.texto.length * 62, miToken))) return false; }       // sin voz: lo que tardaría en leerse
+                else {
+                    var sono = await hablar(f.texto, (opciones.vel || 1) * (f.vel || 1));
+                    if (miToken !== token) return false;
+                    if (!sono) mudo = true;
+                }
                 if (f.pausa && i + 1 < lista.length && !(await pausar(f.pausa, miToken))) return false;
             }
         } catch (e) { return false; }
@@ -330,22 +355,17 @@ var VozWeb = (function () {
         return true;
     }
 
-    /* iOS y otros móviles solo dejan hablar a partir del primer toque: se «despierta» la síntesis con una locución muda */
-    function desbloquear() {
-        if (!soportada || !window.Voz || Voz.motor() !== 'web') return;
-        try { var u = new SpeechSynthesisUtterance(' '); u.volume = 0; sint.speak(u); } catch (e) {}
-    }
-    ['pointerdown', 'keydown', 'touchend'].forEach(function (ev) { document.addEventListener(ev, desbloquear, { capture: true, passive: true, once: true }); });
-
     return {
         disponible: function () { return soportada; },
         iniciar: iniciar,
         decir: decir,
         parar: parar,
         precargar: function () { return Promise.resolve(); },
-        estado: function () { return !soportada || sinVozEspanola ? 'error' : 'lista'; },
+        estado: function () { if (soportada && !voz) elegirVoz(); return !soportada || sinVozEspanola ? 'error' : 'lista'; },
         /* nombre de la voz elegida (para enseñarlo en las opciones), o '' si aún no se sabe */
-        nombre: function () { return voz ? voz.name : ''; },
+        nombre: function () { if (soportada && !voz) elegirVoz(); return voz ? voz.name : ''; },
+        /* la última frase no llegó a sonar (el navegador no la reprodujo) */
+        mudo: function () { return mudo; },
         alCambiarVoz: function (f) { avisos.push(f); cargarVoces(); }
     };
 
@@ -380,6 +400,7 @@ window.Voz = (function () {
         },
         webDisponible: function () { return VozWeb.disponible(); },
         nombreVozWeb: function () { return VozWeb.nombre(); },
+        webMudo: function () { return VozWeb.mudo(); },
         alCambiarVozWeb: function (f) { VozWeb.alCambiarVoz(f); }
     };
 

@@ -22,6 +22,7 @@ const app = {
         q: null,                  // pregunta en curso
         pasos: null,              // operación en curso en «Paso a paso» (sigue de pregunta en pregunta hasta la solución)
         recientes: [],            // últimas operaciones, para no repetir enseguida
+        consignas: {},            // tipos de pregunta cuya consigna ya se ha dicho en esta partida
         falladas: [],             // operaciones falladas en la partida
         timeouts: [],
         lastRankingKey: null
@@ -33,6 +34,13 @@ const app = {
         pasos: { nombre: 'Paso a paso', icono: '🪜', velocidad: [3500, 7000] },
         arrastrar: { nombre: 'Arrastrar', icono: '✋', velocidad: [8000, 15000] },
         mezcla: { nombre: 'Todo junto', icono: '🧩', velocidad: [4000, 8000] }
+    },
+    /* lo que se dice en voz alta la primera vez que aparece cada tipo de pregunta en una partida */
+    CONSIGNAS: {
+        reconocer: '¿Qué operación hay que resolver primero?',
+        igualdad: '¿Qué operación vale lo mismo?',
+        pasos: '¿Qué operación queda en cada paso?',
+        arrastrar: 'Resuelve el primer paso y arrastra lo que queda.'
     },
     MODOS: { timeattack: 'CONTRARRELOJ', sudden_death: 'MUERTE SÚBITA', survival: 'SUPERVIVENCIA', practice: 'PRÁCTICA' },
     // Cuenta atrás 3-2-1 antes de empezar: desactivada (no hay modo con ranking compartido)
@@ -165,8 +173,10 @@ const app = {
         // medidas de maquetación (offset*), no getBoundingClientRect: la pantalla entra con un scale() y la cinta, que está dentro, ya se escala con ella
         let x = 0, y = 0, el = p;
         while (el && el !== sec) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; }
-        Object.assign(c.style, { left: x + 'px', top: y + 'px', width: p.offsetWidth + 'px', height: p.offsetHeight + 'px',
-            borderRadius: getComputedStyle(p).borderTopRightRadius });
+        // por dentro del borde de la tarjeta (clientLeft/clientTop = grosor del borde), con la esquina redondeada un poco menos
+        const radio = Math.max(0, parseFloat(getComputedStyle(p).borderTopRightRadius) - p.clientLeft);
+        Object.assign(c.style, { left: (x + p.clientLeft) + 'px', top: (y + p.clientTop) + 'px', width: p.clientWidth + 'px', height: p.clientHeight + 'px',
+            borderRadius: radio + 'px' });
     },
     /* mientras la tarjeta entra con su animación, la cinta la sigue en cada fotograma (si no, se ve un momento fuera de su sitio) */
     seguirCinta(ms) {
@@ -235,8 +245,9 @@ const app = {
         this.clearLater();
         clearInterval(s.timerId);
         if (this.arrastre) { this.arrastre.destruir(); this.arrastre = null; }
-        Object.assign(s, { score: 0, streak: 0, maxStreak: 0, total: 0, aciertos: 0, lives: 3, q: null, pasos: null, falladas: [], recientes: [], isPlaying: false, pausado: false });
+        Object.assign(s, { score: 0, streak: 0, maxStreak: 0, total: 0, aciertos: 0, lives: 3, q: null, pasos: null, falladas: [], recientes: [], consignas: {}, isPlaying: false, pausado: false });
         Voz.parar();
+        if (VozUI.explicacion() && Voz.estado() === 'lista') Voz.precargar((s.actividad === 'mezcla' ? ['reconocer', 'igualdad', 'pasos', 'arrastrar'] : [s.actividad]).map(t => this.CONSIGNAS[t]));   // la voz de Piper tarda un poco en sintetizar
         updateStreak(0);
         this.$('hud-score').textContent = '0';
         this.$('question-area').innerHTML = '';
@@ -387,8 +398,17 @@ const app = {
         }
         if (q.tipo !== 'arrastrar') area.querySelectorAll('.option-btn').forEach(b => b.addEventListener('click', () => this.responder(parseInt(b.dataset.i, 10), b)));
         this.$('answer-note').className = 'answer-note';
+        this.decirConsigna(q.tipo);
         this.ajustarTablero();
         requestAnimationFrame(() => this.ajustarTablero());
+    },
+
+    /* La primera vez que sale cada tipo de pregunta en la partida se lee la consigna una sola vez (si la voz está activada y lista: nunca se espera a que cargue) */
+    decirConsigna(tipo) {
+        const s = this.state;
+        if (s.consignas[tipo] || !this.CONSIGNAS[tipo] || !VozUI.explicacion() || Voz.estado() !== 'lista') return;
+        s.consignas[tipo] = true;
+        Voz.decir(this.CONSIGNAS[tipo]);
     },
 
     /* Si el tablero no cabe (móvil bajo, ventana pequeña), todo lo de dentro (en «em») se reduce a la vez */

@@ -37,6 +37,10 @@ Tema «Arcade galáctico» (`tema.css`): espacio con estrellas, paneles con cont
 
 ⏱️ Contrarreloj (30/60/90/120 s) · 💀 Muerte súbita · ❤️ Supervivencia (3 vidas y un reloj que se acelera) · 🎓 Práctica.
 
+## Voz al empezar
+
+La primera vez que sale cada tipo de pregunta en una partida, la voz lee lo que se pide (una sola vez): «¿Qué operación hay que resolver primero?», «¿Qué operación vale lo mismo?», «¿Qué operación queda en cada paso?» o «Resuelve el primer paso y arrastra lo que queda». Se desactiva con «Explicación con voz».
+
 ## Cuando se falla
 
 «Explicar los fallos»: No · En práctica · **Siempre** (por defecto). El juego y el reloj se paran mientras se explica. La explicación (animada y narrada, o escrita con los mismos textos):
@@ -56,7 +60,7 @@ Controles: Atrás · Pausa/Seguir · Repetir · Adelante, puntos de paso, flecha
 En ⚙️ Opciones → **Voz de las explicaciones** se elige el motor (se guarda en el navegador):
 
 - **🎙️ Piper** (por defecto): voz natural de mujer (es_ES, Sharvard) generada en el propio dispositivo con WebAssembly. La primera visita descarga unos 75 MB y después queda guardada y funciona sin conexión.
-- **🌐 Navegador**: usa la voz española que tenga instalado el dispositivo (Web Speech API), sin descargar nada. Elige sola la más adecuada: español de España, de mujer (como Piper) y lo más natural posible (Edge: «Microsoft Elvira Online (Natural)» · Chrome: «Google español» · Windows: «Helena» · Apple: «Mónica»). Las opciones indican cuál suena. Si el dispositivo no tiene ninguna voz en español, la explicación sigue escrita y animada, sin voz.
+- **🌐 Navegador**: usa la voz española que tenga instalado el dispositivo (Web Speech API), sin descargar nada. Elige sola la más adecuada: español de España, de mujer (como Piper) y lo más natural posible (Edge: «Microsoft Elvira Online (Natural)» · Chrome: «Google español» · Windows: «Helena» · Apple: «Mónica»). Las opciones indican cuál suena. Si el dispositivo no tiene ninguna voz en español, la explicación sigue escrita y animada, sin voz. Si no hay voz en español: Edge trae voces online; en Windows se añade en Configuración → Hora e idioma → Idioma y región → Español → Voz. En iPhone, Safari solo habla tras un toque: si no suena, pulsa «Probar» una vez.
 - **🔊 Probar** lee una frase con el motor elegido.
 
 Si ninguna voz carga, el juego sigue con la explicación escrita.
