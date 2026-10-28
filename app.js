@@ -77,7 +77,8 @@ const app = {
     },
 
     /* Ajusta el contenido de un panel al alto disponible (sin scroll) reduciéndolo un poco si hace falta */
-    ajustarPanel(screenId) {
+    ajustarPanel(screenId) { sinTransiciones(() => this._ajustarPanel(screenId)); },
+    _ajustarPanel(screenId) {
         const pantalla = this.$(screenId); if (!pantalla) return;
         const panel = pantalla.querySelector('.glass-panel'); if (!panel) return;
         // el contenido (o, si no hay un contenedor, cada hijo del panel) se reduce hasta que todo cabe: en ninguna pantalla debe aparecer scroll.
@@ -503,7 +504,8 @@ const app = {
     },
 
     /* Si el tablero no cabe (móvil bajo, ventana pequeña), todo lo de dentro (en «em») se reduce a la vez */
-    ajustarTablero() {
+    ajustarTablero() { sinTransiciones(() => this._ajustarTablero()); },
+    _ajustarTablero() {
         const b = document.querySelector('.game-board'); if (!b || !this.$('screen-game').classList.contains('active') && !this.state.isPlaying) return;
         /* «Paso a paso»: la operación empieza siendo la más larga; el tamaño que le hizo falta se mantiene en todas sus preguntas (si no, todo cambiaría de tamaño y de sitio al ir acortándose) */
         const q = this.state.q, pasos = q && q.tipo === 'pasos' && this._escPasos && this._escPasos.clave === q.op.clave;

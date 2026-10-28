@@ -2,6 +2,9 @@
 
 Formato de versión: `X.Y.Z`, igual que el número que llevan los archivos en `index.html` (`?v=…`) y la cinta del menú principal.
 
+## [1.2.19] - 2026-10-28
+- **Adiós al «rebote» al entrar en una pantalla (Firefox, vista móvil).** Los botones llevan `transition: all`, y cada ajuste de tamaño del contenido (`zoom`, `--esc`) cambiaba valores de tamaño varias veces seguidas con medidas por medio: el navegador arrancaba transiciones y medía a medias, así que el zoom salía distinto la segunda vez (0,68 → 0,70 en Firefox a los 0,45 s) y los botones se movían. Ahora todos los ajustes (pantallas, tablero de juego, opciones y explicación escrita) se hacen **sin transiciones** y con una última maquetación forzada antes de devolverlas: el tamaño sale igual a la primera y a la segunda, y no se mueve nada. Comprobado en Firefox 159 (WebDriver BiDi, 354×681, letra ampliada) y en Chrome: pantallas de modos, actividades, opciones y partida estables.
+
 ## [1.2.18] - 2026-10-28
 - **La nota de la solución** (debajo de los botones, «¡Bien! (11 + 3) va primero…») queda separada de la sombra de los botones.
 - **Sin «rebotes» al entrar en pantallas y al elegir nivel.** Al pulsar un modo (o cualquier botón que abre una pantalla) el contenido de la pantalla de actividades se reducía con un bucle lento (≈ 0,5 s con la letra ampliada, con tirón visible) y la explicación del nivel cambiaba de altura al elegir nivel, moviendo todo. Ahora:

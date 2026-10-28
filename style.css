@@ -609,3 +609,6 @@ html.corta .mode-card .icon { font-size: 1.7rem; }
 html.corta.estrecho .glass-panel { padding: 0.8rem 0.7rem; }
 html.corta #screen-game { gap: 0.3rem; }
 html.corta .expr-grande { font-size: calc(2.2em * var(--kx, 1)); }
+
+/* mientras se ajusta el tamaño (app.js · sinTransiciones) no hay transiciones: si no, los botones «rebotan» */
+html.sin-trans *, html.sin-trans *::before, html.sin-trans *::after { transition: none !important; }

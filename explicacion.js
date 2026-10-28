@@ -24,7 +24,8 @@ window.Explicacion = (function () {
             document.body.appendChild(velo);
             /* si el texto no cabe en la pantalla (móvil pequeño, letra grande), se reduce hasta que quepa: nunca hay scroll */
             var caja = velo.querySelector('.ex-box'), hijos = [].slice.call(caja.children);
-            function ajustar() {
+            function ajustar() { sinTransiciones(ajustarCaja); }
+            function ajustarCaja() {
                 var z = 1; hijos.forEach(function (e) { e.style.zoom = 1; });
                 while (caja.scrollHeight > caja.clientHeight + 1 && z > 0.4) { z -= 0.03; hijos.forEach(function (e) { e.style.zoom = z.toFixed(2); }); }
             }

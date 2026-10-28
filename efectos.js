@@ -197,3 +197,12 @@ function cerrarModal(m) {
     setTimeout(function () { m.classList.add('hidden'); m.classList.remove('cerrando'); }, 220);
 }
 function abrirModal(m) { if (m) { m.classList.remove('cerrando'); m.classList.remove('hidden'); } }
+
+/* Ejecuta fn (un ajuste de tamaño que mide y vuelve a medir) SIN transiciones CSS: los botones llevan «transition: all» y, al cambiar el zoom
+   o --esc varias veces seguidas con lecturas de medidas por medio, cada cambio arrancaba una transición y se veía un «rebote» de tamaño.
+   Antes de devolver las transiciones se fuerza una última maquetación para que el estado final ya esté calculado. */
+window.sinTransiciones = function (fn) {
+    var h = document.documentElement;
+    h.classList.add('sin-trans');
+    try { fn(); } finally { void h.offsetHeight; h.classList.remove('sin-trans'); }
+};

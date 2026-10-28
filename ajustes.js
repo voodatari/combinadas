@@ -21,7 +21,8 @@
     /* Si las opciones no caben a lo alto (escala fija grande, ventana baja), el contenido se reduce lo justo para que quepa entero.
        Se calcula de una vez a partir del alto natural (siempre el mismo resultado) y se aplica antes de que la ventana termine de entrar:
        así no hay «rebotes» de tamaño. */
-    function ajustar() {
+    function ajustar() { sinTransiciones(ajustarSinTransiciones); }
+    function ajustarSinTransiciones() {
         var panel = modal.querySelector('.panel-opciones'), cont = panel && panel.querySelector('.panel-contenido');
         if (!cont || modal.classList.contains('hidden')) return;
         cont.style.zoom = 1;
