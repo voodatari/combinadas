@@ -2,6 +2,9 @@
 
 Formato de versión: `X.Y.Z`, igual que el número que llevan los archivos en `index.html` (`?v=…`) y la cinta del menú principal.
 
+## [1.2.9] - 2026-10-28
+- **Volteo de los botones en cascada de verdad, y un 20 % más rápido.** Cada tarjeta tarda ahora 0,29 s en dar su vuelta entera (media vuelta para irse y media para que salga la nueva; antes 0,36 s). La del centro empieza cuando la de la izquierda va por la mitad de su vuelta, y la de la derecha cuando la del centro va por la mitad. Todo el volteo dura unos 0,6 s.
+
 ## [1.2.8] - 2026-10-28
 - **«Paso a paso»: el «= ?» ya no desaparece de golpe.** Antes, al empezar a subir la operación resuelta, el signo `= ?` se quitaba al instante y se notaba un salto. Ahora viaja con la operación (pegado a su derecha, sin alterar su posición) y se desvanece con un fundido rápido (0,16 s) cuando ya está colocada en el historial. Además la operación sale del sitio exacto donde estaba su parte izquierda.
 - **Botones: giran sobre el eje vertical, de izquierda a derecha y uno detrás de otro.** Empieza el de la izquierda (el viejo gira media vuelta y por la otra cara sale el nuevo); poco antes de que acabe, empieza el del centro, y poco antes de que acabe el del centro, el de la derecha. La operación nueva se sigue volteando sobre el eje horizontal. Todo dura unos 1,1 s.

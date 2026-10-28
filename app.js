@@ -429,8 +429,8 @@ const app = {
                 /* Tarjetas que se voltean (eje horizontal): cada botón viejo gira hasta quedar de canto y, por la otra cara, sale el nuevo; la operación
                    nueva también se voltea. Empieza cuando la anterior ha terminado de subir. */
                 // Botones: cada tarjeta gira sobre el eje vertical (media vuelta para irse, media para que salga la nueva) y van una detrás de otra, de izquierda
-                // a derecha: la siguiente empieza un poco antes de que acabe la anterior. La operación se voltea sobre el eje horizontal.
-                const MEDIO = 180, SOLAPE = 50, ESCALON = 2 * MEDIO - SOLAPE;
+                // a derecha: la siguiente empieza cuando la anterior va por la mitad de su vuelta. La operación se voltea sobre el eje horizontal.
+                const MEDIO = 144, ESCALON = MEDIO;      // media vuelta = 144 ms (la vuelta entera de una tarjeta, 288); la siguiente empieza cuando la anterior va por la mitad
                 const voltear = (el, eje, desde, hasta, retardo) => el.animate(
                     [{ transform: 'perspective(700px) rotate' + eje + '(' + desde + 'deg)' }, { transform: 'perspective(700px) rotate' + eje + '(' + hasta + 'deg)' }],
                     { duration: MEDIO, delay: retardo, easing: desde ? 'ease-out' : 'ease-in', fill: desde ? 'backwards' : 'both' });    // los nuevos acaban sin transform (el hover sigue funcionando)
