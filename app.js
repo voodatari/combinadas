@@ -155,6 +155,7 @@ const app = {
         this.$('ranking-activity-select').addEventListener('change', () => this.renderRanking());
 
         window.addEventListener('resize', () => {
+            this._escPasos = null;
             this.ajustarTablero();
             ['screen-config', 'screen-results'].forEach(id => { if (this.$(id).classList.contains('active')) this.ajustarPanel(id); });
             this.posicionarCinta();
@@ -371,6 +372,7 @@ const app = {
 
     pintarPregunta() {
         const q = this.state.q, op = q.op, area = this.$('question-area'), texto = this.$('question-text');
+        let pasosPrev = null;
         area.classList.remove('bloqueado');
         const ind = this.$('step-indicator');
         ind.innerHTML = (this.state.actividad === 'mezcla' ? this.TIPOS[q.tipo].icono + ' ' + this.TIPOS[q.tipo].nombre : '') +
@@ -387,7 +389,17 @@ const app = {
         } else if (q.tipo === 'pasos') {
             const ultimo = q.estado === op.n - 1;
             texto.innerHTML = ultimo ? '<b>Último paso</b>: ¿cuánto vale la operación?' : q.estado === 0 ? '<b>Resuelve el primer paso</b>: ¿cómo queda la operación?' : '<b>Resuelve el siguiente paso</b>: ¿cómo queda la operación?';
-            area.innerHTML = '<div class="expr-grande">' + this.exprHTML(Op.antes(op, q.estado)) + '<span class="igual">=</span><span class="interr">?</span></div><div class="options-grid' + (ultimo ? ' tres' : '') + '">' +
+            // los pasos ya resueltos quedan arriba, pequeños, para que se vea la progresión. El sitio de TODAS las líneas está reservado desde
+            // la primera pregunta (las que faltan, vacías y arriba), así la operación y los botones no cambian de sitio al ir apareciendo
+            const huecos = op.n - 1, previos = [];
+            for (let h = 0; h < huecos; h++) {
+                const k = h - (huecos - q.estado);          // paso que va en este sitio: los más recientes, abajo
+                previos.push(k >= 0 ? '<div class="hist-linea">' + (k ? '<span class="igual">=</span>' : '') + this.exprHTML(Op.antes(op, k)) + '</div>' : '<div class="hist-linea vacia">&nbsp;</div>');
+            }
+            pasosPrev = this.capturarPasos(area, op, q.estado);
+            if (pasosPrev) { pasosPrev.botones = area.querySelector('.options-grid'); if (pasosPrev.botones) pasosPrev.botones.remove(); }     // los botones viejos se quedan hasta el fundido
+            area.innerHTML = '<div class="historial">' + previos.join('') + '</div>' +
+                '<div class="expr-grande">' + (q.estado ? '<span class="igual">=</span>' : '') + this.exprHTML(Op.antes(op, q.estado)) + '<span class="igual">=</span><span class="interr">?</span></div><div class="options-grid' + (ultimo ? ' tres' : '') + '">' +
                 q.opciones.map((o, i) => '<button type="button" class="option-btn" data-i="' + i + '"><span class="expr">' + esc(o.texto) + '</span></button>').join('') + '</div>';
         } else {
             texto.innerHTML = '<b>Monta el siguiente paso</b>: resuelve el primer paso y arrastra lo que queda';
@@ -400,6 +412,46 @@ const app = {
         this.$('answer-note').className = 'answer-note';
         this.decirConsigna(q.tipo);
         this.ajustarTablero();
+        if (q.tipo === 'pasos') {
+            area.dataset.pasosOp = op.clave; area.dataset.pasosEstado = q.estado;
+            const fin = this.animarPasos(area, pasosPrev);
+            if (fin) {
+                // La operación nueva no aparece hasta que la anterior ha terminado de subir. Los botones NO desaparecen: los viejos se quedan en su sitio
+                // hasta que se voltean.
+                const expr = area.querySelector('.expr-grande'), grid = area.querySelector('.options-grid'), viejos = pasosPrev.botones;
+                expr.classList.add('espera'); grid.classList.add('espera');
+                if (viejos) {
+                    area.style.position = 'relative';
+                    Object.assign(viejos.style, { position: 'absolute', left: grid.offsetLeft + 'px', top: grid.offsetTop + 'px', width: grid.offsetWidth + 'px', height: grid.offsetHeight + 'px', margin: '0' });
+                    viejos.classList.add('bloqueado');
+                    area.appendChild(viejos);
+                }
+                /* Tarjetas que se voltean (eje horizontal): cada botón viejo gira hasta quedar de canto y, por la otra cara, sale el nuevo; la operación
+                   nueva también se voltea. Empieza cuando la anterior ha terminado de subir. */
+                // Botones: cada tarjeta gira sobre el eje vertical (media vuelta para irse, media para que salga la nueva) y van una detrás de otra, de izquierda
+                // a derecha: la siguiente empieza un poco antes de que acabe la anterior. La operación se voltea sobre el eje horizontal.
+                const MEDIO = 180, SOLAPE = 50, ESCALON = 2 * MEDIO - SOLAPE;
+                const voltear = (el, eje, desde, hasta, retardo) => el.animate(
+                    [{ transform: 'perspective(700px) rotate' + eje + '(' + desde + 'deg)' }, { transform: 'perspective(700px) rotate' + eje + '(' + hasta + 'deg)' }],
+                    { duration: MEDIO, delay: retardo, easing: desde ? 'ease-out' : 'ease-in', fill: desde ? 'backwards' : 'both' });    // los nuevos acaban sin transform (el hover sigue funcionando)
+                const revelar = () => {
+                    if (this.state.q !== q) { if (viejos) viejos.remove(); return; }
+                    expr.classList.remove('espera'); grid.classList.remove('espera');
+                    expr.style.animation = 'none';
+                    const nuevos = [...grid.querySelectorAll('.option-btn')];
+                    q.inicio = Date.now() + 2 * MEDIO + (nuevos.length - 1) * ESCALON;      // el tiempo para contestar cuenta desde que se ven los botones nuevos
+                    if (!expr.animate) { if (viejos) viejos.remove(); return; }
+                    voltear(expr, 'X', -90, 0, MEDIO);
+                    nuevos.forEach((b, i) => voltear(b, 'Y', 90, 0, i * ESCALON + MEDIO));
+                    if (viejos) {
+                        const fin2 = [...viejos.querySelectorAll('.option-btn')].map((b, i) => voltear(b, 'Y', 0, -90, i * ESCALON).finished);
+                        Promise.all(fin2).then(() => viejos.remove(), () => viejos.remove());
+                    }
+                };
+                fin.then(revelar, revelar);
+            }
+        }
+        else { delete area.dataset.pasosOp; delete area.dataset.pasosEstado; }
         requestAnimationFrame(() => this.ajustarTablero());
     },
 
@@ -411,11 +463,50 @@ const app = {
         Voz.decir(this.CONSIGNAS[tipo]);
     },
 
+    /* «Paso a paso»: si esta pregunta es el paso siguiente de la anterior (se acaba de acertar), guarda dónde estaban en pantalla la operación grande
+       y las líneas del historial para poder moverlas (técnica FLIP) */
+    capturarPasos(area, op, estado) {
+        if (area.dataset.pasosOp !== op.clave || Number(area.dataset.pasosEstado) + 1 !== estado) return null;
+        const grande = area.querySelector('.expr-grande');
+        if (!grande) return null;
+        // la parte que de verdad se va al historial: la operación sin el «= ?» del final
+        const gr = grande.getBoundingClientRect(), iguales = grande.querySelectorAll('.igual'), ult = iguales.length ? iguales[iguales.length - 1].getBoundingClientRect() : gr;
+        return { grande: { left: gr.left, top: gr.top, height: gr.height, width: ult.left - gr.left }, hist: [...area.querySelectorAll('.hist-linea:not(.vacia)')].map(e => e.getBoundingClientRect()) };
+    },
+    /* La operación que se acaba de resolver se encoge y sube a su sitio en el historial, y las que ya estaban suben un poco, a la vez que aparece la siguiente */
+    animarPasos(area, prev) {
+        if (!prev || !area.animate) return null;
+        const animaciones = [];
+        [...area.querySelectorAll('.hist-linea:not(.vacia)')].forEach((el, i) => {
+            const nueva = el.getBoundingClientRect(), vieja = i < prev.hist.length ? prev.hist[i] : prev.grande, desdeGrande = i >= prev.hist.length;
+            if (!nueva.height) return;
+            let resto = null;
+            if (desdeGrande) {      // el «= ?» (que ya no forma parte de la línea) viaja con ella, fuera del flujo, y se desvanece cuando está en su sitio
+                el.insertAdjacentHTML('beforeend', '<span class="resto"><span class="igual">=</span><span class="interr">?</span></span>');
+                resto = el.lastElementChild;
+            }
+            const dx = vieja.left + vieja.width / 2 - (nueva.left + nueva.width / 2), dy = vieja.top + vieja.height / 2 - (nueva.top + nueva.height / 2);
+            const esc = desdeGrande ? Math.min(4, vieja.height / nueva.height) : 1;
+            animaciones.push(el.animate([
+                { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + esc + ')', color: desdeGrande ? '#ffffff' : getComputedStyle(el).color, opacity: desdeGrande ? 1 : 0.8 },
+                { transform: 'none', color: getComputedStyle(el).color, opacity: 0.8 }
+            ], { duration: 800, easing: 'cubic-bezier(0.3, 0.1, 0.2, 1)' }));
+        });
+        const fin = animaciones.length ? Promise.all(animaciones.map(a => a.finished)) : null;
+        if (fin) fin.then(() => area.querySelectorAll('.hist-linea .resto').forEach(r => {
+            const a = r.animate && r.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: 'ease-out', fill: 'forwards' });
+            if (a) a.onfinish = () => r.remove(); else r.remove();
+        }), () => {});
+        return fin;
+    },
+
     /* Si el tablero no cabe (móvil bajo, ventana pequeña), todo lo de dentro (en «em») se reduce a la vez */
     ajustarTablero() {
         const b = document.querySelector('.game-board'); if (!b || !this.$('screen-game').classList.contains('active') && !this.state.isPlaying) return;
-        let esc = 1;
-        b.style.setProperty('--esc', '1');
+        /* «Paso a paso»: la operación empieza siendo la más larga; el tamaño que le hizo falta se mantiene en todas sus preguntas (si no, todo cambiaría de tamaño y de sitio al ir acortándose) */
+        const q = this.state.q, pasos = q && q.tipo === 'pasos' && this._escPasos && this._escPasos.clave === q.op.clave;
+        let esc = pasos ? this._escPasos.esc : 1;
+        b.style.setProperty('--esc', esc.toFixed(2));
         // se mide con rectángulos reales (Range): con el contenido centrado, scrollWidth no avisa del desborde por la izquierda
         const rango = document.createRange();
         const desborda = e => {
@@ -426,6 +517,7 @@ const app = {
         };
         const noCabe = () => b.scrollHeight > b.clientHeight + 1 || [...b.querySelectorAll('.expr-grande, .plantilla, .bandeja, .option-btn, .answer-note')].some(desborda);
         for (let n = 0; n < 16 && noCabe() && esc > 0.5; n++) { esc -= 0.04; b.style.setProperty('--esc', esc.toFixed(2)); }
+        if (q && q.tipo === 'pasos') this._escPasos = { clave: q.op.clave, esc };
     },
 
     comprobarArrastre() {
@@ -438,7 +530,7 @@ const app = {
     teclado(e) {
         const q = this.state.q;
         if (!this.state.isPlaying || !q || q.resuelta || e.ctrlKey || e.metaKey || e.altKey) return;
-        if (!this.$('screen-game').classList.contains('active') || this.state.pausado) return;
+        if (!this.$('screen-game').classList.contains('active') || this.state.pausado || this.$('question-area').querySelector('.espera')) return;
         if (q.tipo === 'arrastrar') { if (e.key === 'Enter') { e.preventDefault(); this.comprobarArrastre(); } return; }
         const n = parseInt(e.key, 10);
         if (!n || n > 3) return;

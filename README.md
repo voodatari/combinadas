@@ -14,7 +14,7 @@ Sin cuentas ni base de datos: el ranking, el nombre y los ajustes se guardan en 
 |---|---|
 | 🔎 **¿Cuál va primero?** | Se ve una operación: ¿qué operación hay que resolver **primero**? (el primer paso real y dos «pasos trampa»: empezar por la izquierda, saltarse un número, usar la operación equivocada…) |
 | ⚖️ **Elige la igualdad** | Tres operaciones; ¿cuál queda después de resolver el primer paso? (los errores clásicos: empezar por la izquierda, cambiar la operación, ignorar el paréntesis…) |
-| 🪜 **Paso a paso** | Se plantea una operación combinada y en cada pregunta se resuelve **un paso**: primero ¿cómo queda? y al final ¿cuánto vale? La misma operación sigue de pregunta en pregunta hasta la solución (el indicador dice «paso 2 de 3») |
+| 🪜 **Paso a paso** | Se plantea una operación combinada y en cada pregunta se resuelve **un paso**: primero ¿cómo queda? y al final ¿cuánto vale? La misma operación sigue de pregunta en pregunta hasta la solución (el indicador dice «paso 2 de 3» y los pasos ya resueltos se quedan arriba, pequeños, como una cadena de igualdades) |
 | ✋ **Arrastrar** | Se resuelve el primer paso y se monta **lo que queda** moviendo números y operaciones (+ − × ÷) a los huecos; los de operación son violetas y los paréntesis que quedan ya vienen puestos (ratón o dedo; también tocar pieza y luego hueco) |
 | 🧩 **Todo junto** | Las cuatro mezcladas |
 
@@ -24,10 +24,10 @@ Sin cuentas ni base de datos: el ranking, el nombre y los ajustes se guardan en 
 |---|---|---|
 | 🌱 1 | `4 + 3 × 5`, números del 2 al 9 | 2 |
 | 🌿 2 | también restas, divisiones exactas y dos operaciones del mismo nivel: `10 − 6 + 2`, `12 ÷ 3 × 4` (números del 2 al 12) | 2 |
-| 🌳 3 | **cuatro números y paréntesis**: `(4 + 3) × 5 − 2`, `8 + 3 × (9 − 4)`, `(12 + 8) − (3 + 2)` (números del 2 al 20, siempre con cuentas de cabeza) | **3 como mínimo** |
+| 🌳 3 | **cuatro números y paréntesis**: `(4 + 3) × 5 − 2`, `8 + 3 × (9 − 4)`, `(12 + 8) − (3 + 2)` (números del 2 al 15, resultados hasta 30) | **3 como mínimo** |
 | 🎲 Mixto | los tres niveles | 2 o 3 |
 
-**Todo se hace de cabeza**: ningún número ni resultado pasa de 100, las multiplicaciones son de tablas (un factor de 10 o menos, producto hasta 100) y se divide entre 10 o menos; también en las respuestas malas y en las explicaciones. Las divisiones siempre son **exactas**, no hay resultados negativos y todos los números y resultados son distintos entre sí (una sola forma válida de resolverla). Los paréntesis del nivel 3 siempre sirven para algo (sin ellos saldría otro resultado). En «¿Cuál va primero?» nunca se ofrece como mala una opción que también valdría (dos operaciones independientes, como `2 × 3` y `4 × 5` en `2 × 3 + 4 × 5`).
+**Todo se hace de cabeza**: ningún número ni resultado de un paso pasa de 30, las multiplicaciones son de tablas (un factor de 10 o menos) y se divide entre 10 o menos; también en las respuestas malas y en las explicaciones. Las divisiones siempre son **exactas**, no hay resultados negativos y todos los números y resultados son distintos entre sí (una sola forma válida de resolverla). Los paréntesis del nivel 3 siempre sirven para algo (sin ellos saldría otro resultado). En «¿Cuál va primero?» nunca se ofrece como mala una opción que también valdría (dos operaciones independientes, como `2 × 3` y `4 × 5` en `2 × 3 + 4 × 5`).
 
 ## Aspecto
 

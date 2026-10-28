@@ -28,12 +28,8 @@
         var ms = getComputedStyle(modal), ps = getComputedStyle(panel);
         var libre = modal.clientHeight - parseFloat(ms.paddingTop) - parseFloat(ms.paddingBottom);
         var marco = parseFloat(ps.paddingTop) + parseFloat(ps.paddingBottom) + parseFloat(ps.borderTopWidth) + parseFloat(ps.borderBottomWidth);
-        var z = Math.min(1, (libre - marco - 6) / cont.offsetHeight);            // offsetHeight no cambia con la animación de entrada
-        if (z < 1) {
-            z = Math.max(0.4, z);
-            cont.style.zoom = z.toFixed(3);
-            while (panel.scrollHeight > panel.clientHeight + 1 && z > 0.4) { z -= 0.01; cont.style.zoom = z.toFixed(3); }     // por si el texto se recoloca al reducir
-        }
+        var z = Math.min(1, (libre - marco - 12) / cont.offsetHeight);           // offsetHeight no cambia con la animación de entrada
+        cont.style.zoom = Math.max(0.4, Math.floor(z * 50) / 50).toFixed(2);                            // sin iterar y a saltos de 0,02: diferencias de un píxel no cambian el tamaño
     }
     window.ajustarOpciones = ajustar;
     window.addEventListener('resize', ajustar);

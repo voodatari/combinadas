@@ -157,7 +157,7 @@
             { nombre: 'izq', p: 'NoNoN', ops: [[MEN, MAS], [DIV, MUL]] }
         ] },
         /* nivel 3: siempre 4 números = 3 pasos */
-        3: { num: [2, 20], plantillas: [
+        3: { num: [2, 15], plantillas: [
             { nombre: 'lineal', p: 'NoNoNoN' }, { nombre: 'lineal', p: 'NoNoNoN' },
             { nombre: 'parIzq', p: '(NoN)oNoN' },
             { nombre: 'parMedio', p: 'No(NoN)oN' },
@@ -166,9 +166,9 @@
         ] }
     };
 
-    /* Todo se tiene que poder hacer de cabeza: ningún número ni resultado pasa de 100, las multiplicaciones son de tablas
-       (un factor de 10 o menos, producto hasta 100) y se divide entre 10 o menos. */
-    var LIMITE = 100;
+    /* Todo se tiene que poder hacer de cabeza: ningún número ni resultado de un paso pasa de 30, las multiplicaciones son de tablas
+       (un factor de 10 o menos) y se divide entre 10 o menos. */
+    var LIMITE = 30;
     function entero(x) { return x != null && isFinite(x) && Math.floor(x) === x && x >= 1 && x <= LIMITE; }
     function facil(p) {
         if (p.o === MUL) return Math.min(p.x, p.y) <= 10 && p.valor <= LIMITE;

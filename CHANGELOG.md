@@ -2,6 +2,27 @@
 
 Formato de versión: `X.Y.Z`, igual que el número que llevan los archivos en `index.html` (`?v=…`) y la cinta del menú principal.
 
+## [1.2.8] - 2026-10-28
+- **«Paso a paso»: el «= ?» ya no desaparece de golpe.** Antes, al empezar a subir la operación resuelta, el signo `= ?` se quitaba al instante y se notaba un salto. Ahora viaja con la operación (pegado a su derecha, sin alterar su posición) y se desvanece con un fundido rápido (0,16 s) cuando ya está colocada en el historial. Además la operación sale del sitio exacto donde estaba su parte izquierda.
+- **Botones: giran sobre el eje vertical, de izquierda a derecha y uno detrás de otro.** Empieza el de la izquierda (el viejo gira media vuelta y por la otra cara sale el nuevo); poco antes de que acabe, empieza el del centro, y poco antes de que acabe el del centro, el de la derecha. La operación nueva se sigue volteando sobre el eje horizontal. Todo dura unos 1,1 s.
+
+## [1.2.7] - 2026-10-28
+- **«Paso a paso»: tarjetas que se voltean en vez de fundidos.** Cuando la operación anterior ha terminado de subir, cada botón viejo gira hasta quedar de canto y, por la otra cara, sale el botón nuevo (uno detrás de otro; ver 1.2.8 para el eje y el orden); la operación nueva también se voltea sobre el eje horizontal. Todo dura unos 0,65 s. Los botones nuevos acaban sin ninguna transformación, así que el efecto al pasar el ratón sigue funcionando.
+
+## [1.2.6] - 2026-10-28
+- **Cuentas aún más fáciles**: ningún número ni resultado de un paso pasa de **30** (antes 100). Las multiplicaciones siguen siendo de tablas (un factor de 10 o menos) y se divide entre 10 o menos. Vale también para las respuestas malas, la bandeja de «Arrastrar» y lo que enseña la explicación. En el nivel 3 los números van del 2 al 15 (antes del 2 al 20): con el tope de 30 se generan más rápido y siempre salen. Ejemplos del nivel 3: `7 + 2 × 8 − 3`, `(3 + 12) × 2 − 9`, `9 + 4 × (13 − 8)`.
+- Los fundidos de «Paso a paso» (operación nueva y cruce de botones) son algo más rápidos: 0,3 s (antes 0,45 s).
+
+## [1.2.5] - 2026-10-28
+- **«Paso a paso»: primero sube, luego aparece.** Al acertar, la operación que estaba se desplaza hacia arriba y se reduce; la operación nueva espera (invisible, ocupando ya su sitio) a que esa animación termine y entonces aparece con un fundido suave (0,45 s). **Los botones no desaparecen**: se quedan los viejos y, a la vez que sale la operación nueva, se funden con los nuevos. No se pueden pulsar —ni con el teclado— hasta que los nuevos se ven, y el tiempo para contestar (los puntos por velocidad) cuenta desde ese momento.
+
+## [1.2.4] - 2026-10-28
+- **Opciones: nada se redimensiona al cambiar de voz.** Los cuatro textos de ayuda de «Voz de las explicaciones» están siempre en la página, uno sobre otro, y solo se ve el que toca: el hueco es el del más largo, así que el alto no cambia entre Piper y Navegador (ni cuando sale el aviso de que no suena). El tamaño del panel se calcula a saltos de 0,02 para que diferencias de un píxel no lo muevan. En móvil ahora también se ve ese texto (antes se ocultaba y no se veía el aviso de que la voz no sonaba).
+- **«Paso a paso»: los botones ya no cambian de sitio.** El espacio de todas las líneas del historial se reserva desde la primera pregunta (las que faltan, vacías y arriba), y la operación y los botones quedan fijos mientras se van llenando. El tamaño que hizo falta para la primera (la operación más larga) se mantiene en todas las preguntas de esa operación; por eso al principio los elementos son algo más pequeños en pantallas estrechas.
+
+## [1.2.3] - 2026-10-28
+- **«Paso a paso» con progresión visible**: al acertar un paso, la operación que se acaba de resolver se encoge y sube a un historial pequeño encima de la actual (en la misma animación entra la siguiente), y las que ya estaban suben un poco. Queda escrito como una cadena: `6 × 7 − 18 + 10` · `= 42 − 18 + 10` · `= 24 + 10 = ?`. Si se falla, la pregunta se repite sin mover nada.
+
 ## [1.2.2] - 2026-10-28
 - **Consigna en voz alta**: la primera vez que sale cada tipo de pregunta en una partida se lee lo que se pide, una sola vez: «¿Qué operación hay que resolver primero?» (¿Cuál va primero?), «¿Qué operación vale lo mismo?» (Elige la igualdad), «¿Qué operación queda en cada paso?» (Paso a paso) y «Resuelve el primer paso y arrastra lo que queda» (Arrastrar). En «Todo junto» se dice cada una la primera vez que aparece. Respeta «Explicación con voz» (desactivada, no habla) y nunca espera a que cargue Piper; con Piper se sintetiza por adelantado al empezar la partida.
 

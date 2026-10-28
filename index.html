@@ -11,11 +11,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Fredoka:wght@500;600;700&family=Lilita+One&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=1.2.2">
-    <link rel="stylesheet" href="explicacion.css?v=1.2.2">
-    <link rel="stylesheet" href="tema.css?v=1.2.2">
-    <script src="rendimiento.js?v=1.2.2"></script>
-    <script src="escala.js?v=1.2.2"></script>
+    <link rel="stylesheet" href="style.css?v=1.2.8">
+    <link rel="stylesheet" href="explicacion.css?v=1.2.8">
+    <link rel="stylesheet" href="tema.css?v=1.2.8">
+    <script src="rendimiento.js?v=1.2.8"></script>
+    <script src="escala.js?v=1.2.8"></script>
 </head>
 
 <body>
@@ -49,7 +49,7 @@
                     <button id="btn-show-ranking" class="btn-secondary" data-go="screen-ranking">🏆 Rankings</button>
                 </div>
             </div>
-            <div class="cinta-version" aria-hidden="true"><span id="version-cinta">v1.2.2</span></div>
+            <div class="cinta-version" aria-hidden="true"><span id="version-cinta">v1.2.8</span></div>
         </section>
 
         <!-- PANTALLA 2: SELECCIÓN DE MODO -->
@@ -297,7 +297,12 @@
                     <button type="button" data-motor="web">🌐 Navegador</button>
                     <button type="button" id="voz-probar-button">🔊 Probar</button>
                 </div>
-                <span class="aj-sub aj-nota" id="voz-motor-info"></span>
+                <div class="aj-sub aj-nota voz-info" id="voz-motor-info">
+                    <span data-v="piper">Voz natural que funciona sin conexión. La primera vez descarga unos 75 MB.</span>
+                    <span data-v="web">Usa la voz del dispositivo. No descarga nada.</span>
+                    <span data-v="sinvoz">No hay voz en español en este dispositivo: prueba con Edge o añade el español en Windows (Configuración → Hora e idioma → Voz). Mientras, se lee sin voz.</span>
+                    <span data-v="mudo">El navegador no ha reproducido la voz. Pulsa «Probar» otra vez, sube el volumen o usa Piper.</span>
+                </div>
             </div>
             <div class="aj-fondo">
                 <span class="aj-tit">✨ Fondo animado</span>
@@ -323,18 +328,18 @@
         </div>
     </div>
 
-    <script src="bucle.js?v=1.2.2"></script>
-    <script src="operaciones.js?v=1.2.2"></script>
-    <script src="sonido.js?v=1.2.2"></script>
-    <script src="fondo.js?v=1.2.2"></script>
-    <script src="efectos.js?v=1.2.2"></script>
-    <script src="voz.js?v=1.2.2"></script>
-    <script src="infografia.js?v=1.2.2"></script>
-    <script src="explicacion.js?v=1.2.2"></script>
-    <script src="ajustes.js?v=1.2.2"></script>
-    <script src="voz-ui.js?v=1.2.2"></script>
-    <script src="arrastre.js?v=1.2.2"></script>
-    <script src="app.js?v=1.2.2"></script>
+    <script src="bucle.js?v=1.2.8"></script>
+    <script src="operaciones.js?v=1.2.8"></script>
+    <script src="sonido.js?v=1.2.8"></script>
+    <script src="fondo.js?v=1.2.8"></script>
+    <script src="efectos.js?v=1.2.8"></script>
+    <script src="voz.js?v=1.2.8"></script>
+    <script src="infografia.js?v=1.2.8"></script>
+    <script src="explicacion.js?v=1.2.8"></script>
+    <script src="ajustes.js?v=1.2.8"></script>
+    <script src="voz-ui.js?v=1.2.8"></script>
+    <script src="arrastre.js?v=1.2.8"></script>
+    <script src="app.js?v=1.2.8"></script>
 </body>
 
 </html>
