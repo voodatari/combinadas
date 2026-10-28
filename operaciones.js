@@ -149,6 +149,7 @@
     /* ---------- generación ---------- */
     /* Cada plantilla es un dibujo de la operación: N = número, o = operación, ( ) = paréntesis.
        ops: las parejas de operaciones que se pueden usar (sin ops, se sortean libres: ver opsLibres) */
+    /* niveles: 1 y 2 = 3 números / 2 pasos; 3 = 4 números / 3 pasos */
     var NIV = {
         1: { num: [2, 9], plantillas: [{ nombre: 'pri', p: 'NoNoN', ops: [[MAS, MUL]] }] },
         2: { num: [2, 12], plantillas: [
@@ -165,7 +166,15 @@
         ] }
     };
 
-    function entero(x) { return x != null && isFinite(x) && Math.floor(x) === x && x >= 1 && x <= 200; }
+    /* Todo se tiene que poder hacer de cabeza: ningún número ni resultado pasa de 100, las multiplicaciones son de tablas
+       (un factor de 10 o menos, producto hasta 100) y se divide entre 10 o menos. */
+    var LIMITE = 100;
+    function entero(x) { return x != null && isFinite(x) && Math.floor(x) === x && x >= 1 && x <= LIMITE; }
+    function facil(p) {
+        if (p.o === MUL) return Math.min(p.x, p.y) <= 10 && p.valor <= LIMITE;
+        if (p.o === DIV) return p.y <= 10 && p.x <= LIMITE;
+        return p.valor <= LIMITE;
+    }
 
     function construir(patron, ops, nums) {
         var t = [], ni = 0, oi = 0, pi = 0;
@@ -192,7 +201,7 @@
         if (!ops) return null;
         for (i = 0; i < n; i++) nums.push(azar(N.num[0], N.num[1]));
         var t0 = construir(pl.p, ops, nums), sim = simular(t0);
-        if (!sim) return null;
+        if (!sim || !sim.pasos.every(facil)) return null;
         /* los números y los resultados: naturales y distintos (los intermedios, de 2 en adelante) */
         var v = nums.concat(sim.pasos.map(function (p) { return p.valor; }));
         for (i = 0; i < v.length; i++) if (!entero(v[i]) || (i >= n && i < v.length - 1 && v[i] < 2)) return null;
@@ -247,7 +256,9 @@
             ops.forEach(function (o) {
                 var propio = j === i + 2 && plano[i + 1].v === o;
                 if (propio && plano[i + 1].id === opCorrecta) return;       // este es el primer paso bueno
-                l.push({ i: i, j: j, o: o, propio: propio, plano: plano, v: calc(Number(plano[i].v), o, Number(plano[j].v)) });
+                var v = calc(Number(plano[i].v), o, Number(plano[j].v));
+                if (v != null && v > LIMITE) return;                         // ni las opciones malas llevan cuentas que no sean de cabeza
+                l.push({ i: i, j: j, o: o, propio: propio, plano: plano, v: v });
             });
         }
         return l;
@@ -276,10 +287,9 @@
         var cad = cadena(r.tokens);
         return { tokens: r.tokens, cadena: cad ? cad.map(texto) : null, valor: cad ? Number(cad[cad.length - 1][0].v) : null };
     }
-    /* los malos ordenados: los «propios» primero, luego los de cuenta razonable (nada de 7 × 200) y al final los demás; mezclados dentro de cada grupo */
+    /* los malos ordenados: los «propios» primero, luego los de resultado razonable y al final los demás; mezclados dentro de cada grupo */
     function ordenar(l, q) {
-        var cota = 1.5 * Math.max(q.pasos[0].valor, Math.max.apply(null, q.tokens.filter(esNum).map(function (t) { return Number(t.v); })));
-        function razonable(x) { return x.c.v <= cota && (x.f == null || x.f <= 4 * q.calc.total + 20); }
+        function razonable(x) { return x.f == null || x.f <= Math.min(LIMITE, 4 * q.calc.total + 20); }
         var resto = l.filter(function (x) { return !x.c.propio; });
         return barajar(l.filter(function (x) { return x.c.propio; })).concat(barajar(resto.filter(razonable)), barajar(resto.filter(function (x) { return !razonable(x); })));
     }
@@ -290,6 +300,7 @@
         candidatos(q).forEach(function (c) {
             var cons = consecuencia(q, c);
             if (cons && cons.valor === total) return;             // empezar por ahí también vale (operaciones independientes): no se ofrece
+            if (cons && cons.valor != null && cons.valor > LIMITE) cons = null;      // no se explica con resultados disparatados
             var o = { tokens: [limpio(c.plano[c.i]), ope(c.o, c.propio ? c.plano[c.i + 1].id : 'w'), limpio(c.plano[c.j])], ok: false, cons: cons && cons.valor != null ? cons : null };
             o.texto = texto(o.tokens);
             (cons ? buenos : raros).push({ c: c, o: o, f: cons ? cons.valor : null });
@@ -310,7 +321,7 @@
         var vistos = {}; vistos[correcta.texto] = 1;
         candidatos(q).forEach(function (c) {
             var cons = consecuencia(q, c);
-            if (!cons || cons.valor == null || cons.valor === total) return;
+            if (!cons || cons.valor == null || cons.valor === total || cons.valor > LIMITE) return;
             var o = { tokens: cons.tokens, ok: false, valor: cons.valor, texto: texto(cons.tokens) };
             if (!vistos[o.texto]) { vistos[o.texto] = 1; buenos.push({ c: c, o: o, f: cons.valor }); }
         });
@@ -325,13 +336,13 @@
         var posibles = [];
         candidatos(q, true).forEach(function (c) {
             var cons = consecuencia(q, c);
-            if (cons && cons.valor != null && cons.valor <= 2 * total + 10 && !vistos[cons.valor]) { vistos[cons.valor] = 1; posibles.push(cons.valor); }
+            if (cons && cons.valor != null && cons.valor <= Math.min(LIMITE, 2 * total + 10) && !vistos[cons.valor]) { vistos[cons.valor] = 1; posibles.push(cons.valor); }
         });
         posibles.sort(function (a, b) { return Math.abs(a - total) - Math.abs(b - total); }).slice(0, 2).forEach(function (v) { malos.push(nuevo(v)); });
         /* último recurso: total ± algo (son números sueltos, así que un «casi» vale perfectamente) */
         for (var k = 1; malos.length < 2 && k <= 5; k++) {
             [total + k, total - k].forEach(function (v) {
-                if (malos.length >= 2 || v < 0 || vistos[v]) return;
+                if (malos.length >= 2 || v < 0 || v > LIMITE || vistos[v]) return;
                 vistos[v] = 1; malos.push(nuevo(v));
             });
         }
@@ -347,7 +358,7 @@
     /* lo que se monta: lo que queda tras el primer paso. Los números y las operaciones son huecos; los paréntesis ya están puestos */
     function plantillaArrastre(q) {
         var N = NIV[q.nivel] || NIV[1], vistos = {}, esencial = [], extra = [], est0 = q.estados[0];
-        function poner(l, v) { if (v != null && Math.floor(v) === v && v >= 1 && v <= 200 && !vistos[v]) { vistos[v] = 1; l.push(v); } }
+        function poner(l, v) { if (v != null && Math.floor(v) === v && v >= 1 && v <= LIMITE && !vistos[v]) { vistos[v] = 1; l.push(v); } }
         /* imprescindibles: los números de lo que queda (los intactos y el resultado del primer paso) */
         q.estados[1].forEach(function (t) { if (t.k === 'n') poner(esencial, Number(t.v)); });
         /* los demás: los números de la operación, el total y los resultados de los pasos tramposos */

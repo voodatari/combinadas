@@ -18,7 +18,20 @@
     }
     pintar();
 
-    function abrir() { Sonido.efecto('click'); abrirModal(modal); }
+    /* Si las opciones no caben a lo alto (escala fija grande, ventana baja), el contenido se reduce un poco hasta que quepa: nunca se corta */
+    function ajustar() {
+        var panel = modal.querySelector('.panel-opciones'), cont = panel && panel.querySelector('.panel-contenido');
+        if (!cont || modal.classList.contains('hidden')) return;
+        cont.style.zoom = 1;
+        var z = 1;
+        while (panel.scrollHeight > panel.clientHeight + 1 && z > 0.4) { z -= 0.03; cont.style.zoom = z.toFixed(2); }
+        if (z < 1) cont.style.zoom = Math.max(0.4, z - 0.03).toFixed(2);       // un poco de margen: el límite exacto es inestable
+    }
+    window.ajustarOpciones = ajustar;
+    window.addEventListener('resize', ajustar);
+    modal.addEventListener('click', function () { setTimeout(ajustar, 0); });          // al cambiar un ajuste puede cambiar el alto (textos de ayuda)
+
+    function abrir() { Sonido.efecto('click'); abrirModal(modal); ajustar(); setTimeout(ajustar, 350); }
     function cerrar() { cerrarModal(modal); }          // con animación de salida (efectos.js)
 
     document.getElementById('settings-button').addEventListener('click', abrir);

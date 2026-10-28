@@ -38,6 +38,7 @@ window.VozUI = (function () {
         infoMotor.textContent = m === 'web'
             ? (Voz.estado() === 'error' ? 'Este dispositivo no tiene ninguna voz en español instalada: las explicaciones se leerán sin voz.' : 'Usa la voz del dispositivo' + (nombre ? ': ' + nombre : '') + '. No descarga nada.')
             : 'Voz natural que funciona sin conexión. La primera vez descarga unos 75 MB.';
+        if (window.ajustarOpciones) ajustarOpciones();      // el texto puede ocupar otra línea
     }
 
     function esconderChip(ms) {

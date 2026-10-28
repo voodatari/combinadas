@@ -180,6 +180,8 @@ body.en-juego .gear-btn { display: none; }
     padding: 1rem 0.9rem; display: grid; grid-template-columns: auto 1fr; column-gap: 0.8rem; align-items: center; text-align: left;
 }
 .activity-card .icon { grid-row: span 2; font-size: 2rem; }
+/* con 5 actividades, la última (Todo junto) ocupa todo el ancho para que la cuadrícula no quede coja */
+.activity-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .activity-card strong { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.03rem; font-size: 1rem; color: var(--primary-glow); }
 .activity-card small { color: var(--text-muted); font-weight: 400; font-size: 0.8rem; }
 .activity-card:hover { border-color: var(--primary); background: rgba(139, 92, 246, 0.12); }

@@ -24,10 +24,14 @@ Sin cuentas ni base de datos: el ranking, el nombre y los ajustes se guardan en 
 |---|---|---|
 | 🌱 1 | `4 + 3 × 5`, números del 2 al 9 | 2 |
 | 🌿 2 | también restas, divisiones exactas y dos operaciones del mismo nivel: `10 − 6 + 2`, `12 ÷ 3 × 4` (números del 2 al 12) | 2 |
-| 🌳 3 | **cuatro números y paréntesis**: `(4 + 3) × 5 − 2`, `8 + 3 × (9 − 4)`, `(12 + 8) − (3 + 2)` (números del 2 al 20) | **3 como mínimo** |
+| 🌳 3 | **cuatro números y paréntesis**: `(4 + 3) × 5 − 2`, `8 + 3 × (9 − 4)`, `(12 + 8) − (3 + 2)` (números del 2 al 20, siempre con cuentas de cabeza) | **3 como mínimo** |
 | 🎲 Mixto | los tres niveles | 2 o 3 |
 
-Las divisiones siempre son **exactas**, no hay resultados negativos y todos los números y resultados son distintos entre sí (una sola forma válida de resolverla). Los paréntesis del nivel 3 siempre sirven para algo (sin ellos saldría otro resultado). En «¿Cuál va primero?» nunca se ofrece como mala una opción que también valdría (dos operaciones independientes, como `2 × 3` y `4 × 5` en `2 × 3 + 4 × 5`).
+**Todo se hace de cabeza**: ningún número ni resultado pasa de 100, las multiplicaciones son de tablas (un factor de 10 o menos, producto hasta 100) y se divide entre 10 o menos; también en las respuestas malas y en las explicaciones. Las divisiones siempre son **exactas**, no hay resultados negativos y todos los números y resultados son distintos entre sí (una sola forma válida de resolverla). Los paréntesis del nivel 3 siempre sirven para algo (sin ellos saldría otro resultado). En «¿Cuál va primero?» nunca se ofrece como mala una opción que también valdría (dos operaciones independientes, como `2 × 3` y `4 × 5` en `2 × 3 + 4 × 5`).
+
+## Aspecto
+
+Tema «Arcade galáctico» (`tema.css`): espacio con estrellas, paneles con contorno grueso, botones de arcade que se hunden al pulsar y los cuatro modos como cartas de colores. Solo cambia el aspecto: quitando el `<link>` de `tema.css` en `index.html` vuelve el cuaderno cuadriculado de `style.css`.
 
 ## Modos
 
@@ -66,6 +70,6 @@ Si ninguna voz carga, el juego sigue con la explicación escrita.
 
 ## Archivos
 
-`operaciones.js` (motor: una operación es una lista de fichas con N números y N−1 pasos; generación, regla del orden, opciones de cada actividad, comprobación del arrastre; también funciona en Node) · `app.js` (pantallas, modos, partida, ranking, máquina de estados de «Paso a paso») · `arrastre.js` (arrastrar y soltar) · `infografia.js` (explicación animada) · `explicacion.js` (versión escrita) · `voz.js` (Piper + voz del navegador) · `voz-worker.js` + `piper/` (Piper en un Web Worker) · `voz-ui.js` (opciones de voz) · `escala.js` (escala fija y clases móviles) · `sonido.js`, `bucle.js`, `fondo.js`, `efectos.js`, `rendimiento.js`, `ajustes.js`.
+`operaciones.js` (motor: una operación es una lista de fichas con N números y N−1 pasos; generación, regla del orden, opciones de cada actividad, comprobación del arrastre; también funciona en Node) · `app.js` (pantallas, modos, partida, ranking, máquina de estados de «Paso a paso») · `arrastre.js` (arrastrar y soltar) · `infografia.js` (explicación animada) · `explicacion.js` (versión escrita) · `voz.js` (Piper + voz del navegador) · `voz-worker.js` + `piper/` (Piper en un Web Worker) · `voz-ui.js` (opciones de voz) · `tema.css` (el tema visual) · `escala.js` (escala fija y clases móviles) · `sonido.js`, `bucle.js`, `fondo.js`, `efectos.js`, `rendimiento.js`, `ajustes.js`.
 
 `herramientas/probar-comb.js` (fuera de `web/`) es una prueba automatizada del motor: `node herramientas/probar-comb.js` genera miles de operaciones y valida pasos, totales, opciones y plantillas.

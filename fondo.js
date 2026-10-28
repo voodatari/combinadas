@@ -1,6 +1,6 @@
 /* =========================================================
    Fondo animado · con el tema del juego
-   - numeros : cifras y signos (× + − ( ) =) que flotan como tiza en un cuaderno
+   - numeros : cifras y signos (× + − ( ) =) que flotan por el espacio
    - puntos  : cuadrículas de puntos de dos colores que se separan y se vuelven a juntar
    En modo ligero usa menos elementos; se pausa si la pestaña no se ve.
    Fondo.set('numeros' | 'puntos' | 'none')
@@ -46,7 +46,7 @@ window.Fondo = (function () {
             if (g.y < -g.tam * 1.5) { glifos[i] = nuevoGlifo(false); continue; }
             ctx.save();
             ctx.translate(g.x, g.y); ctx.rotate(g.rot);
-            ctx.font = '700 ' + g.tam + 'px Andika, sans-serif';
+            ctx.font = '700 ' + g.tam + 'px Fredoka, Andika, sans-serif';
             ctx.fillStyle = g.c + g.a + ')';
             ctx.fillText(g.t, 0, 0);
             ctx.restore();

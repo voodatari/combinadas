@@ -1,0 +1,235 @@
+/* =========================================================
+   Tema «Arcade galáctico» (pensado para 5.º): una misión por el espacio con aire de videojuego
+   Fondo de estrellas y planetas, paneles con contorno grueso, botones «de arcade» que se hunden al pulsar,
+   modos de colores y tipografía redondeada (Fredoka para los números, Lilita One para los títulos).
+   Va DESPUÉS de style.css y explicacion.css y solo cambia el aspecto (variables, colores, bordes, fondos):
+   quitando el <link> de index.html se vuelve al cuaderno cuadriculado.
+   Los colores con significado (a, b, c, e = números · r = resultado · d = operaciones) se mantienen.
+   ========================================================= */
+
+:root {
+    --bg-dark: #12083d;
+    --primary: #8a5cff;
+    --primary-glow: #e6dcff;
+    --secondary: #35f0d2;
+    --accent: #ffd93b;
+    --danger: #ff4d7d;
+    --good: #58f08a;
+    --c-a: #ffd93b;
+    --c-b: #48b4ff;
+    --c-c: #ff8a3d;
+    --c-d: #cf9bff;
+    --c-e: #ff7ad9;
+    --text-main: #f6f2ff;
+    --text-muted: #c4b8f2;
+    --glass-bg: rgba(44, 24, 120, 0.9);
+    --glass-border: rgba(170, 140, 255, 0.4);
+    --glass-shadow: 0 0.4rem 0 #05011a, 0 1.2rem 2.2rem rgba(0, 0, 0, 0.45);
+    --font-word: 'Fredoka', 'Andika', 'Trebuchet MS', sans-serif;
+    --contorno: #0a0426;
+}
+
+/* ---------- Fondo: espacio, estrellas y planetas ---------- */
+body {
+    background-color: var(--bg-dark);
+    background-image:
+        radial-gradient(ellipse at 12% 8%, rgba(120, 60, 230, 0.75) 0%, transparent 46%),
+        radial-gradient(ellipse at 92% 88%, rgba(255, 61, 154, 0.38) 0%, transparent 42%),
+        radial-gradient(ellipse at 55% 125%, rgba(30, 120, 255, 0.45) 0%, transparent 52%),
+        linear-gradient(180deg, #1d0e63 0%, #0d0535 100%);
+}
+#overlay {
+    background:
+        radial-gradient(circle at center, transparent 35%, rgba(8, 3, 28, 0.62) 100%),
+        radial-gradient(1.5px 1.5px at 25px 35px, #fff 50%, transparent 52%),
+        radial-gradient(1px 1px at 110px 80px, rgba(255, 255, 255, 0.85) 50%, transparent 52%),
+        radial-gradient(2px 2px at 170px 150px, #ffe9a0 50%, transparent 52%),
+        radial-gradient(1px 1px at 60px 170px, rgba(180, 220, 255, 0.95) 50%, transparent 52%),
+        radial-gradient(1.5px 1.5px at 210px 20px, #ffc2f0 50%, transparent 52%);
+    background-size: auto, 230px 230px, 190px 190px, 310px 310px, 170px 170px, 260px 260px;
+    animation: estrellas 160s linear infinite;
+}
+@keyframes estrellas {
+    from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+    to { background-position: 0 0, -230px 230px, -190px 190px, -310px 310px, -170px 170px, -260px 260px; }
+}
+html.ligero #overlay { animation: none; }
+/* un planeta con anillo y una luna que asoman por las esquinas */
+#overlay::before, #overlay::after { content: ''; position: absolute; border-radius: 50%; pointer-events: none; }
+#overlay::before {
+    width: 30rem; height: 30rem; left: -11rem; bottom: -13rem; opacity: 0.55;
+    background: radial-gradient(circle at 34% 28%, #ffb3e3 0%, #b552ee 38%, #4b1ca8 72%, #1d0a5c 100%);
+    box-shadow: inset -1.5rem -1.5rem 3rem rgba(10, 2, 50, 0.55);
+}
+#overlay::after {
+    width: 8rem; height: 8rem; right: 4%; top: -3rem; opacity: 0.5;
+    background: radial-gradient(circle at 35% 30%, #fff4b8 0%, #ffcf4a 45%, #d98a14 100%);
+    box-shadow: inset -0.8rem -0.8rem 1.4rem rgba(120, 50, 0, 0.45);
+}
+html.estrecho #overlay::before { width: 18rem; height: 18rem; left: -8rem; bottom: -8rem; }
+html.estrecho #overlay::after { width: 5rem; height: 5rem; top: -1.6rem; }
+
+/* ---------- Paneles y ventanas: contorno oscuro grueso + filo de luz ---------- */
+.glass-panel, .dialog-box, .modal-overlay > .glass-panel {
+    background: linear-gradient(180deg, rgba(66, 40, 170, 0.96) 0%, rgba(36, 18, 106, 0.97) 100%);
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+    border: 0.2rem solid var(--contorno); border-radius: 1.7rem;
+    box-shadow: inset 0 0 0 0.14rem rgba(170, 140, 255, 0.42), inset 0 0.45rem 0 rgba(255, 255, 255, 0.07), 0 0.4rem 0 #05011a, 0 1.2rem 2.2rem rgba(0, 0, 0, 0.45);
+}
+.game-hud {
+    background: linear-gradient(180deg, rgba(66, 40, 170, 0.96), rgba(36, 18, 106, 0.97)); backdrop-filter: none; -webkit-backdrop-filter: none;
+    border: 0.18rem solid var(--contorno);
+    box-shadow: inset 0 0 0 0.12rem rgba(170, 140, 255, 0.4), 0 0.3rem 0 #05011a;
+}
+.modal-overlay, .dialog-overlay { background: rgba(8, 3, 32, 0.82); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.resp-overlay { background: rgba(8, 3, 32, 0.35); }
+.voz-carga, .toast { background: rgba(44, 24, 120, 0.97); border: 0.15rem solid var(--contorno); }
+
+html.ligero .glass-panel, html.ligero .game-hud { background: rgba(44, 24, 120, 0.97); }
+
+/* ---------- Títulos ---------- */
+.logo-title {
+    color: #ffe85a; letter-spacing: 0.03em; transform: rotate(-2deg); margin-bottom: 0.5rem;
+    -webkit-text-stroke: 0.1em var(--contorno); paint-order: stroke fill;
+    text-shadow: 0 0.06em 0 #ff3d8f, 0 0.12em 0 var(--contorno), 0 0.2em 1.4rem rgba(255, 61, 143, 0.55);
+}
+.by-line { color: var(--secondary); }
+.section-title { color: #fff; text-shadow: 0 0.08em 0 rgba(10, 4, 38, 0.7); }
+.subtitle { color: var(--text-main); }
+.logo-expr { text-shadow: 0 0.07em 0 rgba(10, 4, 38, 0.7); }
+.player-input-container label { color: var(--secondary); }
+input[type="text"] { background: rgba(10, 4, 38, 0.6); border: 0.18rem solid var(--secondary); box-shadow: inset 0 0.15rem 0 rgba(0, 0, 0, 0.35); }
+input[type="text"]:focus { border-color: var(--accent); box-shadow: inset 0 0.15rem 0 rgba(0, 0, 0, 0.35), 0 0 1rem rgba(255, 217, 59, 0.5); }
+
+/* ---------- Botones «de arcade»: se hunden al pulsar ---------- */
+.btn-primary {
+    font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; letter-spacing: 0.08rem; color: #11340a;
+    background: linear-gradient(180deg, #c6ff55 0%, #5fd91f 100%);
+    border: 0.18rem solid var(--contorno); box-shadow: inset 0 0.2rem 0 rgba(255, 255, 255, 0.45), 0 0.32rem 0 #2b8a0d, 0 0.5rem 0.9rem rgba(0, 0, 0, 0.4);
+    text-shadow: 0 0.06em 0 rgba(255, 255, 255, 0.45);
+}
+.btn-primary:not(:disabled):hover { transform: translateY(-0.1rem); box-shadow: inset 0 0.2rem 0 rgba(255, 255, 255, 0.5), 0 0.42rem 0 #2b8a0d, 0 0.7rem 1.2rem rgba(0, 0, 0, 0.45); filter: brightness(1.06); }
+.btn-primary:not(:disabled):active { transform: translateY(0.28rem); box-shadow: inset 0 0.2rem 0 rgba(255, 255, 255, 0.4), 0 0.04rem 0 #2b8a0d; }
+.btn-primary.danger { color: #fff; background: linear-gradient(180deg, #ff7aa0, #e0245e); box-shadow: inset 0 0.2rem 0 rgba(255, 255, 255, 0.4), 0 0.32rem 0 #9c1040, 0 0.5rem 0.9rem rgba(0, 0, 0, 0.4); text-shadow: 0 0.06em 0 rgba(0, 0, 0, 0.3); }
+.btn-secondary, .btn-icon {
+    color: #fff; background: rgba(255, 255, 255, 0.1); border: 0.16rem solid rgba(190, 165, 255, 0.55);
+    box-shadow: 0 0.22rem 0 rgba(5, 1, 26, 0.7);
+}
+.btn-secondary:hover, .btn-icon:hover { background: rgba(255, 255, 255, 0.18); border-color: var(--secondary); transform: translateY(-0.08rem); }
+.btn-secondary:active, .btn-icon:active { transform: translateY(0.18rem); box-shadow: 0 0.03rem 0 rgba(5, 1, 26, 0.7); }
+.danger-icon { color: #ffd1de; border-color: rgba(255, 77, 125, 0.7); }
+.danger-icon:hover { background: rgba(255, 77, 125, 0.4); border-color: var(--danger); }
+.gear-btn { background: linear-gradient(180deg, #5a3bd0, #3a22a2); border: 0.16rem solid var(--contorno); box-shadow: inset 0 0.12rem 0 rgba(255, 255, 255, 0.25), 0 0.22rem 0 #05011a; }
+.gear-btn .gear-ico { fill: #fff; }
+.close-x { background: rgba(255, 255, 255, 0.12); border: 0.14rem solid rgba(190, 165, 255, 0.5); box-shadow: 0 0.15rem 0 rgba(5, 1, 26, 0.6); }
+.close-x:hover { background: var(--danger); }
+
+/* ---------- Modos: cuatro cartas de colores ---------- */
+.modes-grid { gap: 1.1rem; }
+.mode-card {
+    --c1: #6a5bff; --c2: #3b2bb8; --sombra: #1d1470;
+    background: linear-gradient(180deg, var(--c1) 0%, var(--c2) 100%); color: #fff;
+    border: 0.2rem solid var(--contorno); border-radius: 1.5rem;
+    box-shadow: inset 0 0.25rem 0 rgba(255, 255, 255, 0.35), 0 0.4rem 0 var(--sombra), 0 0.7rem 1rem rgba(0, 0, 0, 0.35);
+}
+.mode-card[data-mode="timeattack"] { --c1: #3cd3ff; --c2: #1a78e6; --sombra: #0b3f95; }
+.mode-card[data-mode="sudden_death"] { --c1: #ff6f9c; --c2: #d4205f; --sombra: #8b0f3c; }
+.mode-card[data-mode="survival"] { --c1: #ffc247; --c2: #ee6c12; --sombra: #9b4308; }
+.mode-card[data-mode="practice"] { --c1: #74ee8a; --c2: #25ab55; --sombra: #146a33; }
+.mode-card h3 { color: #fff; font-size: 1.3rem; text-shadow: 0 0.09em 0 rgba(0, 0, 0, 0.35); }
+.mode-card p { color: rgba(255, 255, 255, 0.95); font-weight: 600; text-shadow: 0 0.06em 0 rgba(0, 0, 0, 0.25); }
+.mode-card .icon { filter: drop-shadow(0 0.15rem 0 rgba(0, 0, 0, 0.3)); }
+.mode-card:hover { background: linear-gradient(180deg, var(--c1) 0%, var(--c2) 100%); border-color: var(--contorno); transform: translateY(-0.25rem); filter: brightness(1.08); box-shadow: inset 0 0.25rem 0 rgba(255, 255, 255, 0.35), 0 0.55rem 0 var(--sombra), 0 1rem 1.4rem rgba(0, 0, 0, 0.35); }
+.mode-card:active { transform: translateY(0.3rem); box-shadow: inset 0 0.25rem 0 rgba(255, 255, 255, 0.3), 0 0.06rem 0 var(--sombra); }
+
+/* ---------- Actividades, niveles y chips ---------- */
+.activity-card, .stat-box, .action-buttons .tiles .tile, .ajuste, .aj-interruptor, .aj-fondo {
+    background: rgba(12, 4, 52, 0.5); border: 0.17rem solid rgba(170, 140, 255, 0.45);
+    box-shadow: 0 0.2rem 0 rgba(5, 1, 26, 0.6);
+}
+.activity-card strong { color: #fff; }
+.activity-card:hover, .action-buttons .tiles .tile:hover, .ajuste:hover, .aj-interruptor:hover { border-color: var(--secondary); background: rgba(53, 240, 210, 0.1); }
+.activity-card.selected, .ajuste[aria-pressed="true"], .aj-interruptor[aria-pressed="true"] {
+    border-color: var(--accent); background: rgba(255, 217, 59, 0.14); box-shadow: 0 0.2rem 0 rgba(5, 1, 26, 0.6), 0 0 1.3rem rgba(255, 217, 59, 0.3);
+}
+.activity-card.selected strong, .ajuste[aria-pressed="true"] .aj-tit, .aj-interruptor[aria-pressed="true"] .aj-tit { color: var(--accent); }
+.ajuste[aria-pressed="true"] .perf-switch, .aj-interruptor[aria-pressed="true"] .perf-switch { background: var(--secondary); }
+.nuevo { background: var(--danger); color: #fff; border: 0.1rem solid var(--contorno); }
+.segmented button {
+    background: rgba(12, 4, 52, 0.55); color: #fff; border: 0.15rem solid rgba(170, 140, 255, 0.5); box-shadow: 0 0.18rem 0 rgba(5, 1, 26, 0.65);
+}
+.segmented button:hover { border-color: var(--secondary); color: #fff; }
+.segmented button:active { transform: translateY(0.15rem); box-shadow: none; }
+.segmented button.selected { background: linear-gradient(180deg, #6ff7e0, #1fc9ae); color: #04302a; border-color: var(--contorno); box-shadow: inset 0 0.15rem 0 rgba(255, 255, 255, 0.5), 0 0.18rem 0 #0b7a69; }
+.config-label, .config-hint { color: var(--text-muted); }
+.chip-jugador { background: rgba(12, 4, 52, 0.5); border: 0.15rem solid rgba(170, 140, 255, 0.5); color: #fff; }
+select { background: rgba(12, 4, 52, 0.75); border: 0.16rem solid var(--secondary); color: #fff; }
+select option { background: #251070; }
+
+/* Fredoka es más compacta: se separan un poco más los signos */
+.tk-o { padding: 0 0.24em; }
+.expr-grande .tk-o { margin: 0 0.2em; }
+
+/* ---------- Partida ---------- */
+#active-mode-display { color: var(--text-muted); }
+.hud-value { color: var(--accent); text-shadow: 0 0.07em 0 rgba(0, 0, 0, 0.4); }
+.timer-container .hud-value { color: var(--secondary); text-shadow: 0 0.07em 0 rgba(0, 0, 0, 0.4); }
+.hud-label { color: var(--text-muted); }
+.expr-grande { text-shadow: 0 0.06em 0 rgba(10, 4, 38, 0.6), 0 0 1.4rem rgba(138, 92, 255, 0.55); }
+.question-display { color: var(--text-main); }
+.question-display b { color: var(--accent); }
+.step-indicator { color: var(--secondary); }
+.answer-note { color: var(--text-main); }
+.option-btn {
+    color: #fff; background: linear-gradient(180deg, #6d4ef0 0%, #4328b6 100%);
+    border: 0.2rem solid var(--contorno); border-radius: 1.2em;
+    box-shadow: inset 0 0.22rem 0 rgba(255, 255, 255, 0.3), 0 0.32rem 0 #1b0f66, 0 0.5rem 0.8rem rgba(0, 0, 0, 0.3);
+}
+.option-btn .expr { text-shadow: 0 0.06em 0 rgba(0, 0, 0, 0.35); }
+@media (hover: hover) {
+    .option-btn:hover { background: linear-gradient(180deg, #8366ff 0%, #5236d0 100%); border-color: var(--contorno); transform: translateY(-0.15rem); box-shadow: inset 0 0.22rem 0 rgba(255, 255, 255, 0.35), 0 0.46rem 0 #1b0f66, 0 0.8rem 1rem rgba(0, 0, 0, 0.35); }
+}
+.option-btn:active { transform: translateY(0.25rem); box-shadow: inset 0 0.22rem 0 rgba(255, 255, 255, 0.25), 0 0.05rem 0 #1b0f66; }
+.option-btn.correct { background: linear-gradient(180deg, #7bf59a 0%, #22b350 100%); border-color: var(--contorno); box-shadow: inset 0 0.22rem 0 rgba(255, 255, 255, 0.45), 0 0.32rem 0 #0f6b2c, 0 0 1.6rem rgba(88, 240, 138, 0.6); }
+.option-btn.wrong { background: linear-gradient(180deg, #ff7aa0 0%, #d4205f 100%); border-color: var(--contorno); box-shadow: inset 0 0.22rem 0 rgba(255, 255, 255, 0.4), 0 0.32rem 0 #86103a, 0 0 1.6rem rgba(255, 77, 125, 0.6); }
+.hueco { background: rgba(255, 255, 255, 0.08); border: 0.08em dashed rgba(255, 255, 255, 0.6); }
+.hueco.lleno { background: rgba(10, 4, 38, 0.55); border-color: var(--contorno); }
+.hueco.op { border-color: rgba(207, 155, 255, 0.9); background: rgba(207, 155, 255, 0.14); }
+.hueco.op.lleno { border-color: var(--contorno); background: rgba(207, 155, 255, 0.28); }
+.hueco.ok { border-color: var(--good); background: rgba(88, 240, 138, 0.3); }
+.hueco.mal { border-color: var(--danger); background: rgba(255, 77, 125, 0.32); }
+.bandeja { background: rgba(10, 4, 38, 0.45); border: 0.12rem solid rgba(170, 140, 255, 0.4); }
+.pieza {
+    color: #fff; background: linear-gradient(180deg, #6d4ef0, #4328b6); border: 0.1em solid var(--contorno);
+    box-shadow: inset 0 0.08em 0 rgba(255, 255, 255, 0.3), 0 0.08em 0 #1b0f66;
+}
+.pieza.op { color: #2a0f6a; background: linear-gradient(180deg, #e2c4ff, #ae78f2); box-shadow: inset 0 0.08em 0 rgba(255, 255, 255, 0.55), 0 0.08em 0 #6b34b5; }
+.pieza.sel { border-color: var(--accent); box-shadow: 0 0 0.9rem rgba(255, 217, 59, 0.7), 0 0.08em 0 #1b0f66; }
+.pieza-flota { background: rgba(138, 92, 255, 0.7); border: 0.1em solid var(--accent); }
+.ayuda-arrastre { color: var(--text-main); }
+
+/* ---------- Resultados y ranking ---------- */
+.stat-value.accent { color: var(--accent); text-shadow: 0 0.07em 0 rgba(0, 0, 0, 0.4); }
+.celebration-text { color: var(--secondary); }
+.res-repasar .pal { background: rgba(255, 77, 125, 0.2); border: 0.12rem solid rgba(255, 77, 125, 0.65); }
+.ranking-table-container { background: rgba(10, 4, 38, 0.4); border: 0.14rem solid rgba(170, 140, 255, 0.35); }
+.ranking-table th { background: #4a2fb8; color: #fff; }
+.ranking-table td { border-bottom: 1px solid rgba(170, 140, 255, 0.25); }
+.ranking-table tr:first-child td { color: var(--accent); }
+::-webkit-scrollbar-thumb { background: #7a52f0; border: 0.1rem solid var(--contorno); }
+
+/* ---------- Explicación animada ---------- */
+.ig-claqueta, .ex-titulo { color: #fff; text-shadow: 0 0.08em 0 rgba(10, 4, 38, 0.7); }
+.ig-pill { border-width: 0.14rem; font-weight: 600; }
+.ig-pill.mal { background: rgba(255, 77, 125, 0.18); border-color: var(--danger); }
+.ig-pill.bien { background: rgba(88, 240, 138, 0.16); border-color: var(--good); }
+.ig-bocadillo { background: var(--accent); color: #3a2400; border: 0.14rem solid var(--contorno); box-shadow: 0 0.18rem 0 #8a6a00; }
+.ig-punto { background: rgba(255, 255, 255, 0.25); }
+.ig-nav button { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.ex-regla { background: rgba(53, 240, 210, 0.12); border: 0.12rem solid rgba(53, 240, 210, 0.45); }
+.calc-linea { color: #fff; }
+.cinta-version span { color: var(--contorno); background: linear-gradient(90deg, #ff8a3d, #ffd93b); border-color: rgba(10, 4, 38, 0.5); }
+
+/* ---------- Móvil: contornos algo más finos ---------- */
+html.estrecho .glass-panel, html.estrecho .dialog-box { border-width: 0.16rem; border-radius: 1.3rem; }
+html.estrecho .mode-card { padding: 1rem 0.8rem; }

@@ -2,6 +2,12 @@
 
 Formato de versión: `X.Y.Z`, igual que el número que llevan los archivos en `index.html` (`?v=…`) y la cinta del menú principal.
 
+## [1.2.0] - 2026-10-28
+- **Tema visual nuevo: «Arcade galáctico»** (`web/tema.css`, pensado para 5.º). Espacio con estrellas que se desplazan, un planeta y una luna; paneles con contorno oscuro grueso y filo de luz; botones de arcade que se hunden al pulsar (verde para lo principal); los cuatro modos son cartas de colores (azul, rosa, naranja y verde); respuestas como teclas de arcade (se ponen verdes o rojas al contestar); título tipo pegatina; números en Fredoka (redondeada) y títulos en Lilita One. Los colores con significado (números, resultados, operaciones) no cambian. Solo toca el aspecto: quitando el `<link>` de `tema.css` en `index.html` vuelve el cuaderno cuadriculado.
+- **Cuentas de cabeza en todos los niveles y actividades**: ningún número ni resultado pasa de 100, las multiplicaciones son de tablas (un factor de 10 o menos, producto hasta 100) y las divisiones son entre 10 o menos. Lo mismo vale para las respuestas malas, la bandeja de «Arrastrar» y los resultados que enseña la explicación (antes salían cosas como `17 × 200` o 3400).
+- **Opciones**: con «Escala fija» grande o una ventana baja, el panel se cortaba por abajo. Ahora el contenido se reduce lo justo para que quepa entero (también al cambiar de voz, que cambia el texto de ayuda).
+- **Elegir actividad**: «Todo junto» ocupa todo el ancho, así la cuadrícula de 5 actividades ya no queda coja (en ordenador y en móvil).
+
 ## [1.1.0] - 2026-10-28
 Revisión completa de la primera versión (que se llamaba «Múltiples») y dos novedades.
 
