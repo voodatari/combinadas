@@ -179,7 +179,8 @@ select option { background: #251070; }
 .question-display { color: var(--text-main); }
 .question-display b { color: var(--accent); }
 .step-indicator { color: var(--secondary); }
-.answer-note { color: var(--text-main); }
+.answer-note { color: var(--text-main); margin-top: 0.9em; }      /* separado de la sombra de los botones */
+html.estrecho .answer-note { margin-top: 0.8em; }
 .option-btn {
     color: #fff; background: linear-gradient(180deg, #6d4ef0 0%, #4328b6 100%);
     border: 0.2rem solid var(--contorno); border-radius: 1.2em;

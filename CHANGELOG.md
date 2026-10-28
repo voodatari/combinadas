@@ -2,6 +2,31 @@
 
 Formato de versión: `X.Y.Z`, igual que el número que llevan los archivos en `index.html` (`?v=…`) y la cinta del menú principal.
 
+## [1.2.18] - 2026-10-28
+- **La nota de la solución** (debajo de los botones, «¡Bien! (11 + 3) va primero…») queda separada de la sombra de los botones.
+- **Sin «rebotes» al entrar en pantallas y al elegir nivel.** Al pulsar un modo (o cualquier botón que abre una pantalla) el contenido de la pantalla de actividades se reducía con un bucle lento (≈ 0,5 s con la letra ampliada, con tirón visible) y la explicación del nivel cambiaba de altura al elegir nivel, moviendo todo. Ahora:
+  - el ajuste de tamaño de las pantallas se busca con una búsqueda binaria (pocas medidas, unos 0,16 s), siempre da el mismo resultado y repetirlo no cambia nada;
+  - las cuatro explicaciones de nivel están en la página una sobre otra y solo se ve la elegida, así que el alto no cambia al pulsar 1, 2, 3 o Mixto (y se han acortado un poco los textos de los niveles 2 y 3).
+  Comprobado en 354×681 con letra normal y ampliada, 320×560 y escritorio: el tamaño es idéntico antes y después de elegir nivel.
+
+## [1.2.17] - 2026-10-28
+- **«Paso a paso» en móvil vertical: el volteo de los botones va de abajo arriba.** Cuando los botones están en una sola columna giran sobre el eje horizontal (como una hoja que se levanta por abajo), uno detrás de otro en el mismo orden de siempre (de arriba abajo), con la misma cascada. Con los botones en fila (ordenador, móvil apaisado) siguen girando sobre el eje vertical, de izquierda a derecha.
+- **Resultados en móvil**: las dos filas de botones («Jugar otra vez» y «Otra actividad · Ranking · Menú principal») están más separadas, aprovechando el espacio libre.
+
+## [1.2.16] - 2026-10-28
+- **Texto de los botones nunca más grande que la operación** (móvil). La operación que se pregunta aprieta ahora los espacios alrededor de los signos (+, −, ×, ÷) para poder ser más grande dentro del ancho disponible, y si aun así el texto de los botones fuese mayor, se reduce hasta igualarla. En una pantalla de 354×681 la operación pasa de unos 33 px a 42 px y los botones quedan en 32 px.
+
+## [1.2.15] - 2026-10-28
+- **Nunca más scroll en el móvil.** Los botones de «Elige el modo de juego» se cortaban por abajo con la letra del sistema ampliada y obligaban a desplazarse. Ahora **todas** las pantallas con panel (inicio, modos, actividades, resultados y ranking) reducen su contenido lo justo para que quepa entero, a cualquier tamaño de letra o de ventana (hasta el 40 %); antes solo lo hacían actividades y resultados, y solo hasta el 70 %. La explicación escrita también se reduce en vez de mostrar barra de desplazamiento. Se comprobó con pantallas de 354×681, 320×560 (letra de 18 px) y 1280×520.
+- (La lista del ranking, si tiene muchas filas, sigue desplazándose dentro de su propia tabla.)
+
+## [1.2.14] - 2026-10-28
+Ajustes para pantallas de móvil estrechas (o con el texto del sistema ampliado).
+- **Menú «¿Qué quieres practicar?»**: el botón «¡Empezar!» ya no tapa la explicación del nivel. El contenido se reduce hasta lo que haga falta (antes se paraba en el 70 % y en pantallas con la letra grande seguía desbordando).
+- **Partida en móvil**: si la operación es muy ancha, se reduce **solo la operación** (dejando un margen a cada lado) y no todo el tablero; antes se encogía todo —pregunta y botones incluidos— y la operación aun así rozaba el borde. En «Paso a paso» la operación mantiene el mismo tamaño en todas las preguntas de esa operación. También vale para la plantilla de «Arrastrar».
+- **Texto de la pregunta más grande** («paso 1 de 3 · Resuelve el primer paso…»), aprovechando el sitio libre; en «Paso a paso» se reserva menos hueco para la nota de solución, así que los botones quedan más abajo y más grandes.
+- Hueco reservado sobre el historial en móvil para que quepan los carteles de velocidad.
+
 ## [1.2.13] - 2026-10-28
 - **Carteles de velocidad centrados** en «Paso a paso»: ahora quedan a la misma distancia del texto de la pregunta (arriba) que de las operaciones del historial (abajo). Se mide el texto real y no la caja de la pregunta, que es más alta que su última línea y los dejaba demasiado bajos.
 

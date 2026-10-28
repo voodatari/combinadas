@@ -22,11 +22,19 @@ window.Explicacion = (function () {
                     '<div class="dialog-actions"><button type="button" class="btn-primary ex-ok">¡Entendido! Siguiente ➜</button></div>' +
                 '</div>';
             document.body.appendChild(velo);
+            /* si el texto no cabe en la pantalla (móvil pequeño, letra grande), se reduce hasta que quepa: nunca hay scroll */
+            var caja = velo.querySelector('.ex-box'), hijos = [].slice.call(caja.children);
+            function ajustar() {
+                var z = 1; hijos.forEach(function (e) { e.style.zoom = 1; });
+                while (caja.scrollHeight > caja.clientHeight + 1 && z > 0.4) { z -= 0.03; hijos.forEach(function (e) { e.style.zoom = z.toFixed(2); }); }
+            }
+            ajustar(); setTimeout(ajustar, 350);
             var cerrado = false;
             function cerrar() {
                 if (cerrado) return;
                 cerrado = true;
                 document.removeEventListener('keydown', onKey, true);
+                window.removeEventListener('resize', ajustar);
                 if (window.Sonido) Sonido.efecto('click');
                 velo.classList.add('dialog-out');
                 setTimeout(function () { velo.remove(); }, 200);
@@ -35,6 +43,7 @@ window.Explicacion = (function () {
             }
             function onKey(ev) { if (ev.key === 'Escape' || ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); ev.stopPropagation(); cerrar(); } }
             document.addEventListener('keydown', onKey, true);
+            window.addEventListener('resize', ajustar);
             velo.querySelector('.ex-ok').addEventListener('click', cerrar);
             setTimeout(function () { var b = velo.querySelector('.ex-ok'); if (b && !cerrado) b.focus({ preventScroll: true }); }, 50);
         });

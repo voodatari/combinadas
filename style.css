@@ -243,7 +243,7 @@ body.en-juego .gear-btn { display: none; }
 /* La operación */
 .expr-grande {
     display: flex; justify-content: center; align-items: center; flex-wrap: nowrap; white-space: nowrap; gap: 0.06em;
-    font-family: var(--font-word); font-weight: 700; font-size: 4.4em; line-height: 1.15; color: #fff;
+    font-family: var(--font-word); font-weight: 700; font-size: calc(4.4em * var(--kx, 1)); line-height: 1.15; color: #fff;
     text-shadow: 0 0 1.4rem rgba(139, 92, 246, 0.55); animation: q-pop 0.35s ease both;
 }
 .expr-grande .tk-o { color: var(--text-muted); margin: 0 0.14em; font-weight: 400; }
@@ -267,6 +267,7 @@ body.en-juego .gear-btn { display: none; }
 .hist-linea .tk-o { margin: 0 0.14em; font-weight: 400; }
 .hist-linea .igual { margin: 0 0.3em 0 0; font-weight: 400; }
 html.estrecho .hist-linea { font-size: 1.25em; }
+html.estrecho .historial { margin-top: 2em; }       /* hueco reservado para los carteles de velocidad, que van entre la pregunta y el historial */
 @keyframes q-pop { 0% { opacity: 0; } 100% { opacity: 1; } }
 
 /* Respuestas de elegir */
@@ -282,7 +283,7 @@ html.estrecho .hist-linea { font-size: 1.25em; }
 .option-btn .tit { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.02em; font-size: 1.9em; line-height: 1.1; text-align: center; text-wrap: balance; }
 .option-btn .sub { font-size: 0.98em; color: var(--text-muted); font-weight: 400; text-align: center; line-height: 1.3; white-space: nowrap; }
 .option-btn .sub b { font-weight: 700; }
-.option-btn .expr { font-family: var(--font-word); font-weight: 700; font-size: 2.4em; white-space: nowrap; }
+.option-btn .expr { font-family: var(--font-word); font-weight: 700; font-size: calc(2.4em * var(--kb, 1)); white-space: nowrap; }
 @media (hover: hover) {
     .option-btn:hover { background: rgba(110, 231, 208, 0.1); border-color: var(--secondary); transform: translateY(-0.2rem); box-shadow: 0 0.3rem 1rem rgba(110, 231, 208, 0.2); }
 }
@@ -296,11 +297,11 @@ html.estrecho .hist-linea { font-size: 1.25em; }
 
 /* Arrastrar: la plantilla con huecos, la bandeja de piezas y los botones */
 .arrastre { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 0.7em; }
-.plantilla { display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; white-space: nowrap; gap: 0.12em; font-family: var(--font-word); font-weight: 700; font-size: 2.9em; line-height: 1; }
+.plantilla { display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; white-space: nowrap; gap: 0.12em; font-family: var(--font-word); font-weight: 700; font-size: calc(2.9em * var(--kx, 1)); line-height: 1; }
 .plantilla .igual { color: var(--text-muted); font-weight: 400; margin: 0 0.15em 0 0; }
 .plantilla .tk-o, .plantilla .tk-p { color: var(--text-muted); font-weight: 400; }
 .plantilla .tk-p { color: #fff; opacity: 0.9; }
-.plantilla.larga { font-size: 2.3em; }
+.plantilla.larga { font-size: calc(2.3em * var(--kx, 1)); }
 .hueco {
     width: 1.3em; height: 1.4em; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.28em; background: rgba(255, 255, 255, 0.05);
     border: 0.06em dashed rgba(255, 255, 255, 0.5); color: #fff; touch-action: none; transition: background 0.15s, border-color 0.15s, transform 0.15s;
@@ -536,7 +537,7 @@ html.estrecho .stat-value { font-size: 1.5rem; }
 html.estrecho .res-detail { font-size: 0.85rem; margin: 0 0 0.4rem; }
 html.estrecho .res-repasar { font-size: 0.85rem; margin: 0 auto 0.5rem; }
 html.estrecho .celebration-text { font-size: 1.05rem; margin-bottom: 0.8rem; }
-html.estrecho .action-buttons { gap: 0.6rem; }
+html.estrecho .action-buttons { gap: 1.4rem; }       /* las dos filas de botones, separadas (si no cabe, ajustarPanel reduce todo un poco) */
 html.estrecho .action-buttons .tiles { gap: 0.4rem; }
 html.estrecho .action-buttons .tiles .tile { min-height: 4.6rem; padding: 0.5rem 0.15rem; font-size: 0.72rem; }
 html.estrecho .tile .t-ico { font-size: 1.45rem; }
@@ -554,16 +555,21 @@ html.estrecho .hud-value { font-size: 1.1rem; }
 html.estrecho .btn-icon.danger-icon { padding: 0.4rem 0.6rem; font-size: 0.85rem; }
 html.estrecho #streak-badge { min-height: 1.1rem; font-size: 0.8rem; }
 html.estrecho #screen-game > .game-board { height: auto; max-height: none; min-height: 0; padding: 0.8em 0.6em; }
-html.estrecho .question-display { font-size: 1.05em; margin-bottom: 0.3em; }
+html.estrecho .question-display { font-size: 1.3em; margin-bottom: 0.3em; }
+html.estrecho .step-indicator { font-size: 1em; }
 html.estrecho .answer-note { --lineas: 3; margin-top: 0.2em; font-size: 0.95em; }
-html.estrecho .expr-grande { font-size: 3em; }
+html.estrecho .answer-note.pasos { --lineas: 2; font-size: 0.85em; }     /* en «Paso a paso» casi nunca hay nota: menos hueco reservado, más sitio para lo importante */
+html.estrecho .expr-grande { font-size: calc(3em * var(--kx, 1)); }
+/* en móvil la operación aprieta los signos para poder ser más grande (y no menor que el texto de los botones) */
+html.estrecho .expr-grande { gap: 0; }
+html.estrecho .expr-grande .tk-o { margin: 0 0.03em; padding: 0 0.07em; }
 html.estrecho .options-grid, html.estrecho .options-grid.dos { grid-template-columns: 1fr; gap: 0.6em; flex: 1 1 auto; grid-auto-rows: 1fr; align-content: stretch; max-height: 24em; }
 html.estrecho .option-btn { min-height: 0; flex: 1 1 0; max-height: 7.5em; padding: 0.7em 0.5em; flex-direction: column; gap: 0.2em; }
 html.estrecho .option-btn .tit, html.estrecho .options-grid.tres .option-btn .tit { font-size: 1.45em; }
 html.estrecho .option-btn .sub, html.estrecho .options-grid.tres .option-btn .sub { font-size: 0.88em; }
-html.estrecho .option-btn .expr { font-size: 2em; }
-html.estrecho .plantilla { font-size: 2.1em; }
-html.estrecho .plantilla.larga { font-size: 1.55em; }
+html.estrecho .option-btn .expr { font-size: calc(2em * var(--kb, 1)); }
+html.estrecho .plantilla { font-size: calc(2.1em * var(--kx, 1)); }
+html.estrecho .plantilla.larga { font-size: calc(1.55em * var(--kx, 1)); }
 html.estrecho .bandeja { font-size: 1.7em; }
 html.estrecho .pieza { min-width: 1.5em; height: 1.4em; }
 html.estrecho .acciones-arrastre { gap: 0.5em; }
@@ -602,4 +608,4 @@ html.corta .mode-card { padding: 0.6rem 0.8rem; }
 html.corta .mode-card .icon { font-size: 1.7rem; }
 html.corta.estrecho .glass-panel { padding: 0.8rem 0.7rem; }
 html.corta #screen-game { gap: 0.3rem; }
-html.corta .expr-grande { font-size: 2.2em; }
+html.corta .expr-grande { font-size: calc(2.2em * var(--kx, 1)); }

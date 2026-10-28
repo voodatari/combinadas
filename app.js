@@ -47,12 +47,6 @@ const app = {
     CUENTA_ATRAS: false,
     ANONIMO: 'Anónimo',
     MULT_NIVEL: { 1: 1, 2: 1.5, 3: 2 },
-    DESC_NIVEL: {
-        1: 'Nivel 1 · una suma y una multiplicación, con números pequeños (del 2 al 9).',
-        2: 'Nivel 2 · también restas y divisiones exactas, y dos operaciones del mismo nivel (izquierda a derecha).',
-        3: 'Nivel 3 · tres pasos como mínimo: cuatro números, paréntesis, números mayores y todas las combinaciones.',
-        0: 'Mixto · mezcla los tres niveles.'
-    },
 
     // --- ALMACENAMIENTO (todo local, sin cuentas) ---
     leer(k, def) { try { const v = localStorage.getItem('combinadas.' + k); return v === null ? def : JSON.parse(v); } catch (e) { return def; } },
@@ -77,7 +71,7 @@ const app = {
         if (screenId === 'screen-home') this.seguirCinta(900);
         if (screenId === 'screen-ranking') this.abrirRanking();
         if (screenId === 'screen-config') this.pintarConfig();
-        if (screenId === 'screen-config' || screenId === 'screen-results') { this.ajustarPanel(screenId); setTimeout(() => this.ajustarPanel(screenId), 450); }
+        if (screenId !== 'screen-game') { this.ajustarPanel(screenId); setTimeout(() => this.ajustarPanel(screenId), 450); }
         if (['screen-home', 'screen-modes', 'screen-config'].includes(screenId)) Sonido.musica('menu');
         else if (screenId === 'screen-results' || screenId === 'screen-ranking') Sonido.musica('fin');
     },
@@ -85,11 +79,15 @@ const app = {
     /* Ajusta el contenido de un panel al alto disponible (sin scroll) reduciéndolo un poco si hace falta */
     ajustarPanel(screenId) {
         const pantalla = this.$(screenId); if (!pantalla) return;
-        const panel = pantalla.querySelector('.glass-panel'), cont = pantalla.querySelector('.panel-contenido');
-        if (!panel || !cont) return;
-        cont.style.zoom = 1;
-        let z = 1;
-        while (panel.scrollHeight > panel.clientHeight + 1 && z > 0.7) { z -= 0.04; cont.style.zoom = z.toFixed(2); }
+        const panel = pantalla.querySelector('.glass-panel'); if (!panel) return;
+        // el contenido (o, si no hay un contenedor, cada hijo del panel) se reduce hasta que todo cabe: en ninguna pantalla debe aparecer scroll.
+        // Siempre se empieza desde el tamaño normal y se baja a saltos de 0,02 (con un escalón más de margen): el mismo contenido da siempre el mismo
+        // tamaño, así que repetir el ajuste no cambia nada (nada «rebota»)
+        const cont = pantalla.querySelector('.panel-contenido'), objetivos = cont ? [cont] : [...panel.children];
+        const poner = z => objetivos.forEach(e => { e.style.zoom = z; });
+        const cabe = k => { poner((k / 50).toFixed(2)); return panel.scrollHeight <= panel.clientHeight + 1; };
+        let bajo = 20, alto = 50;                                              // búsqueda binaria del mayor k (zoom = k/50) con el que cabe: pocas medidas, mismo resultado siempre
+        if (!cabe(50)) { while (bajo < alto) { const medio = Math.ceil((bajo + alto) / 2); if (cabe(medio)) bajo = medio; else alto = medio - 1; } poner(Math.max(20, bajo - 1) / 50); }
     },
 
     // --- INICIALIZACIÓN ---
@@ -155,9 +153,9 @@ const app = {
         this.$('ranking-activity-select').addEventListener('change', () => this.renderRanking());
 
         window.addEventListener('resize', () => {
-            this._escPasos = null;
+            this._escPasos = null; this._kxPasos = null;
             this.ajustarTablero();
-            ['screen-config', 'screen-results'].forEach(id => { if (this.$(id).classList.contains('active')) this.ajustarPanel(id); });
+            ['screen-home', 'screen-modes', 'screen-config', 'screen-results', 'screen-ranking'].forEach(id => { if (this.$(id).classList.contains('active')) this.ajustarPanel(id); });
             this.posicionarCinta();
         });
         if (document.fonts) document.fonts.addEventListener('loadingdone', () => this.ajustarTablero());
@@ -192,7 +190,8 @@ const app = {
         document.querySelectorAll('#level-seg button').forEach(b => b.classList.toggle('selected', parseInt(b.dataset.nivel, 10) === s.nivel));
         document.querySelectorAll('#time-seg button').forEach(b => b.classList.toggle('selected', parseInt(b.dataset.tiempo, 10) === s.tiempo));
         this.$('time-row').style.display = s.mode === 'timeattack' ? '' : 'none';
-        this.$('level-hint').textContent = this.DESC_NIVEL[s.nivel];
+        // todas las explicaciones de nivel están en la página, una sobre otra, y solo se ve la que toca: el hueco es el de la más larga y no cambia el tamaño al elegir nivel
+        this.$('level-hint').querySelectorAll('span').forEach(e => e.classList.toggle('ver', e.dataset.v === String(s.nivel)));
         this.$('config-title').textContent = this.MODOS[s.mode].charAt(0) + this.MODOS[s.mode].slice(1).toLowerCase() + ' · ¿qué quieres practicar?';
     },
 
@@ -409,7 +408,7 @@ const app = {
             area.querySelector('[data-acc="comprobar"]').addEventListener('click', () => this.comprobarArrastre());
         }
         if (q.tipo !== 'arrastrar') area.querySelectorAll('.option-btn').forEach(b => b.addEventListener('click', () => this.responder(parseInt(b.dataset.i, 10), b)));
-        this.$('answer-note').className = 'answer-note';
+        this.$('answer-note').className = 'answer-note' + (q.tipo === 'pasos' ? ' pasos' : '');
         this.decirConsigna(q.tipo);
         this.ajustarTablero();
         if (q.tipo === 'pasos') {
@@ -428,7 +427,7 @@ const app = {
                 }
                 /* Tarjetas que se voltean (eje horizontal): cada botón viejo gira hasta quedar de canto y, por la otra cara, sale el nuevo; la operación
                    nueva también se voltea. Empieza cuando la anterior ha terminado de subir. */
-                // Botones: cada tarjeta gira sobre el eje vertical (media vuelta para irse, media para que salga la nueva) y van una detrás de otra, de izquierda
+                // Botones: cada tarjeta gira (media vuelta para irse, media para que salga la nueva) y van una detrás de otra, de izquierda
                 // a derecha: la siguiente empieza cuando la anterior va por la mitad de su vuelta. La operación se voltea sobre el eje horizontal.
                 const MEDIO = 115, ESCALON = MEDIO;      // media vuelta = 115 ms (la vuelta entera de una tarjeta, 230); la siguiente empieza cuando la anterior va por la mitad
                 const voltear = (el, eje, desde, hasta, retardo) => el.animate(
@@ -436,15 +435,18 @@ const app = {
                     { duration: MEDIO, delay: retardo, easing: desde ? 'ease-out' : 'ease-in', fill: desde ? 'backwards' : 'both' });    // los nuevos acaban sin transform (el hover sigue funcionando)
                 const revelar = () => {
                     if (this.state.q !== q) { if (viejos) viejos.remove(); return; }
+                    // botones en una sola columna (móvil en vertical): giran sobre el eje horizontal, de abajo arriba, y siguen el mismo orden (de arriba a abajo);
+                    // en fila (ordenador, móvil apaisado): sobre el eje vertical, de izquierda a derecha
+                    const eje = getComputedStyle(grid).gridTemplateColumns.trim().split(/\s+/).length === 1 ? 'X' : 'Y';
                     expr.classList.remove('espera'); grid.classList.remove('espera');
                     expr.style.animation = 'none';
                     const nuevos = [...grid.querySelectorAll('.option-btn')];
                     q.inicio = Date.now() + 2 * MEDIO + (nuevos.length - 1) * ESCALON;      // el tiempo para contestar cuenta desde que se ven los botones nuevos
                     if (!expr.animate) { if (viejos) viejos.remove(); return; }
                     voltear(expr, 'X', -90, 0, MEDIO);
-                    nuevos.forEach((b, i) => voltear(b, 'Y', 90, 0, i * ESCALON + MEDIO));
+                    nuevos.forEach((b, i) => voltear(b, eje, 90, 0, i * ESCALON + MEDIO));
                     if (viejos) {
-                        const fin2 = [...viejos.querySelectorAll('.option-btn')].map((b, i) => voltear(b, 'Y', 0, -90, i * ESCALON).finished);
+                        const fin2 = [...viejos.querySelectorAll('.option-btn')].map((b, i) => voltear(b, eje, 0, -90, i * ESCALON).finished);
                         Promise.all(fin2).then(() => viejos.remove(), () => viejos.remove());
                     }
                 };
@@ -507,6 +509,20 @@ const app = {
         const q = this.state.q, pasos = q && q.tipo === 'pasos' && this._escPasos && this._escPasos.clave === q.op.clave;
         let esc = pasos ? this._escPasos.esc : 1;
         b.style.setProperty('--esc', esc.toFixed(2));
+        /* Si la operación (o la plantilla de arrastrar) es muy ancha, se reduce SOLO ella (con un margen a cada lado) y no todo el tablero:
+           así el texto de la pregunta y los botones conservan su tamaño. En «Paso a paso» se mantiene el mismo tamaño en toda la operación. */
+        const rg = document.createRange();
+        const ajustarAncho = () => b.querySelectorAll('.expr-grande, .plantilla').forEach(el => {
+            const cs = getComputedStyle(b), ancho = (b.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) * 0.94;
+            let k = pasos && this._kxPasos && this._kxPasos.clave === q.op.clave ? this._kxPasos.k : 1;
+            el.style.setProperty('--kx', k.toFixed(3));
+            for (let n = 0; n < 40; n++) {
+                rg.selectNodeContents(el);
+                if (rg.getBoundingClientRect().width <= ancho || k < 0.3) break;
+                k *= 0.96; el.style.setProperty('--kx', k.toFixed(3));
+            }
+            if (q && q.tipo === 'pasos' && el.classList.contains('expr-grande')) this._kxPasos = { clave: q.op.clave, k };
+        });
         // se mide con rectángulos reales (Range): con el contenido centrado, scrollWidth no avisa del desborde por la izquierda
         const rango = document.createRange();
         const desborda = e => {
@@ -515,8 +531,17 @@ const app = {
             const izq = t.left + parseFloat(cs.paddingLeft) - 1, der = t.right - parseFloat(cs.paddingRight) + 1;      // dentro del relleno del tablero
             return c.width > 0 && (c.width > r.width + 1 || c.left < izq || c.right > der);
         };
-        const noCabe = () => b.scrollHeight > b.clientHeight + 1 || [...b.querySelectorAll('.expr-grande, .plantilla, .bandeja, .option-btn, .answer-note')].some(desborda);
-        for (let n = 0; n < 16 && noCabe() && esc > 0.5; n++) { esc -= 0.04; b.style.setProperty('--esc', esc.toFixed(2)); }
+        const noCabe = () => b.scrollHeight > b.clientHeight + 1 || [...b.querySelectorAll('.bandeja, .option-btn, .answer-note')].some(desborda);
+        /* el texto de los botones nunca más grande que el de la operación que se pregunta */
+        const ajustarBotones = () => {
+            b.style.setProperty('--kb', '1');
+            const grande = b.querySelector('.expr-grande'), boton = b.querySelector('.option-btn .expr');
+            if (!grande || !boton) return;
+            const fg = parseFloat(getComputedStyle(grande).fontSize), fb = parseFloat(getComputedStyle(boton).fontSize);
+            if (fb > fg) b.style.setProperty('--kb', (fg / fb).toFixed(3));
+        };
+        ajustarAncho(); ajustarBotones();
+        for (let n = 0; n < 16 && noCabe() && esc > 0.5; n++) { esc -= 0.04; b.style.setProperty('--esc', esc.toFixed(2)); ajustarAncho(); ajustarBotones(); }
         if (q && q.tipo === 'pasos') this._escPasos = { clave: q.op.clave, esc };
     },
 
